@@ -1,9 +1,10 @@
 "use client";
+import GoogleAuthButton from "@/components/GoogleAuthButton";
 import Input from "@/components/Input";
-import { Lock, Mail, User } from "lucide-react";
+import { LoaderCircle, Lock, Mail, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
 
 const SignInPage = () => {
   interface IForm {
@@ -12,11 +13,17 @@ const SignInPage = () => {
     password: string;
     verifyPassword: string;
   }
+  const methods = useForm<IForm>({ mode: "onBlur" }); // Objek utama untuk Provider
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = methods;
 
-  const { register, handleSubmit } = useForm<IForm>();
-
+  const passwordValue = watch("password");
   const onSubmit: SubmitHandler<IForm> = (data) => {
-    console.log(data);
+    console.log("test");
   };
   return (
     <>
@@ -27,88 +34,147 @@ const SignInPage = () => {
         </div>
 
         {/* Form */}
-        <form className="mt-6 w-70" onSubmit={handleSubmit(onSubmit)}>
-          <div className="w-full flex flex-col gap-4 justify-center items-center">
-            {/* Fullname */}
-            <div className="w-full flex flex-col gap-1">
-              <label className="text-sm font-medium">Full Name</label>
-              <div className="relative w-full">
-                <User
-                  className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  size={20}
-                />
-                <Input placeholder="Nafri Bro" type="text" />
+        <FormProvider {...methods}>
+          <form className="mt-6 w-70" onSubmit={handleSubmit(onSubmit)}>
+            <div className="w-full flex flex-col gap-4 justify-center items-center">
+              {/* Fullname */}
+              <div className="w-full flex flex-col gap-1">
+                <label className="text-sm font-medium">Full Name</label>
+                <div className="relative w-full">
+                  <User
+                    className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={20}
+                  />
+                  <Input
+                    placeholder="Nafri Bro"
+                    type="text"
+                    {...register("fullName", {
+                      required: { value: true, message: "Name is required" },
+                      minLength: {
+                        value: 3,
+                        message: "Min 3 characters length ",
+                      },
+                    })}
+                  />
+                </div>
+                {errors.fullName && (
+                  <p className="leading-3 text-sm text-red-500">
+                    {errors.fullName.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="w-full flex flex-col gap-1">
+                <label className="text-sm font-medium">Email</label>
+                <div className="relative w-full">
+                  <Mail
+                    className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={20}
+                  />
+                  <Input
+                    placeholder="name@example.com"
+                    type="text"
+                    {...register("email", {
+                      required: { value: true, message: "Email is required" },
+                      pattern: {
+                        value:
+                          /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                        message: "Invalid email format",
+                      },
+                    })}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="leading-3 text-sm text-red-500">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Password */}
+              <div className="w-full flex flex-col gap-1">
+                <label className="text-sm font-medium">Password</label>
+                <div className="relative w-full">
+                  <Lock
+                    className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={20}
+                  />
+                  <Input
+                    placeholder="Enter your password"
+                    type="password"
+                    {...register("password", {
+                      required: {
+                        value: true,
+                        message: "Password is required",
+                      },
+                      minLength: {
+                        value: 6,
+                        message: "Password min 6 character",
+                      },
+                    })}
+                  />
+                </div>
+                {errors.password && (
+                  <p className="leading-3 text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="w-full flex flex-col gap-1">
+                <label className="text-sm font-medium">Confirm Password</label>
+                <div className="relative w-full">
+                  <Lock
+                    className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={20}
+                  />
+                  <Input
+                    placeholder="Confirm your password"
+                    type="password"
+                    {...register("verifyPassword", {
+                      validate: (value) =>
+                        value === passwordValue || "Password doesn't match",
+                    })}
+                  />
+                </div>
+                {errors.verifyPassword && (
+                  <p className="leading-3 text-sm text-red-500">
+                    {errors.verifyPassword.message}
+                  </p>
+                )}
               </div>
             </div>
-
-            {/* Email */}
-            <div className="w-full flex flex-col gap-1">
-              <label className="text-sm font-medium">Email</label>
-              <div className="relative w-full">
-                <Mail
-                  className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  size={20}
-                />
-                <Input placeholder="name@example.com" type="text" />
-              </div>
+            <div className="w-full flex flex-col mt-4 justify-center items-end">
+              <button
+                disabled={true}
+                className={`flex justify-center w-full ${isSubmitting ? "bg-primary/50" : "bg-primary/80"} p-2 rounded-md hover:bg-primary/60 text-primary-foreground text-sm font-medium`}
+              >
+                {isSubmitting ? (
+                  <LoaderCircle className="animate-spin" size={20} />
+                ) : (
+                  "Sign In"
+                )}
+              </button>
             </div>
+          </form>
 
-            {/* Password */}
-            <div className="w-full flex flex-col gap-1">
-              <label className="text-sm font-medium">Password</label>
-              <div className="relative w-full">
-                <Lock
-                  className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  size={20}
-                />
-                <Input placeholder="Enter your password" type="password" />
-              </div>
+          {/* Seperator */}
+          <div className="relative w-1/2 my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="border-t w-full border-muted-foreground"></span>
             </div>
-
-            {/* Confirm Password */}
-            <div className="w-full flex flex-col gap-1">
-              <label className="text-sm font-medium">Confirm Password</label>
-              <div className="relative w-full">
-                <Lock
-                  className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  size={20}
-                />
-                <Input placeholder="Confirm your password" type="password" />
-              </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                OR CONTINUE WITH
+              </span>
             </div>
           </div>
-          <div className="w-full flex flex-col mt-4 justify-center items-end">
-            <button className="w-full bg-primary/80 p-2 rounded-md hover:bg-primary/60 text-primary-foreground text-sm font-medium ">
-              Sign In
-            </button>
-          </div>
-        </form>
+          {/* Login with google :)) */}
 
-        {/* Seperator */}
-        <div className="relative w-1/2 my-6">
-          <div className="absolute inset-0 flex items-center">
-            <span className="border-t w-full border-muted-foreground"></span>
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              OR CONTINUE WITH
-            </span>
-          </div>
-        </div>
-        {/* Login with google :)) */}
-        <div className="relative w-70">
-          <Image
-            src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-            width={20}
-            height={20}
-            alt="Google Logo"
-            className="absolute top-1/2 -translate-y-1/2 left-3"
-          />
-          <button className="w-full bg-background p-2 shadow-md rounded-md hover:bg-foreground/2 text-foreground text-sm font-medium ">
-            Sign in with Google
-          </button>
-        </div>
-
+          <GoogleAuthButton />
+        </FormProvider>
         {/* Footer */}
         <div className="mt-4">
           <p className="text-sm">
