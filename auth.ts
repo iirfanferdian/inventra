@@ -1,31 +1,11 @@
-import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import CredentialsProvider from "next-auth/providers/credentials";
+import NextAuth from "next-auth";
+import authConfig from "./auth.config";
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: {
-          label: "Email",
-          type: "text",
-          placeholder: "example@gmail.com",
-        },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        console.log(credentials);
-        return {
-          id: "1",
-          name: "irfan",
-          email: "irfan@gmail.com",
-        };
-      },
-    }),
-  ],
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  ...authConfig,
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET,
-};
+});
