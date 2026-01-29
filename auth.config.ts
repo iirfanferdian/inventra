@@ -14,14 +14,6 @@ export default {
         },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        console.log(credentials);
-        return {
-          id: "1",
-          name: "irfan",
-          email: "irfan@gmail.com",
-        };
-      },
     }),
   ],
 } satisfies NextAuthConfig;
