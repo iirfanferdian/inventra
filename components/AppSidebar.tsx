@@ -68,7 +68,7 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem
                     key={item.title}
-                    className="hover:bg-primary hover:text-primary-foreground rounded-md"
+                    className="dark:hover:bg-primary/10 hover:text-foreground/80 dark:hover:text-foreground rounded-md"
                   >
                     <SidebarMenuButton
                       isActive={isActive}
