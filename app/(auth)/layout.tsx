@@ -1,10 +1,17 @@
+import { auth } from "@/auth";
 import { Box, ChartColumn, Shield, Users } from "lucide-react";
+import { redirect } from "next/navigation";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
+  if (session) {
+    redirect("/dashboard");
+  }
   return (
     <div className="w-full min-h-screen grid grid-cols-1 md:grid-cols-2">
       <aside className="hidden md:flex flex-col bg-primary justify-center items-start p-12">
