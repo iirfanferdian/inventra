@@ -1,15 +1,20 @@
-"user server";
 import { prisma } from "@/lib/prisma";
 import { hash, genSalt } from "bcryptjs";
+import { signIn } from "next-auth/react";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const formData = await req.formData();
+    const body = await req.json();
 
-    const email = formData.get("email") as string | null;
-    const password = formData.get("password") as string | null;
-    const fullName = formData.get("fullName") as string | null;
+    if (!body) {
+    }
+
+    console.log(body);
+
+    const email = body.email as string | null;
+    const password = body.password as string | null;
+    const fullName = body.fullName as string | null;
 
     //Validasi field
     if (!email || !password || !fullName) {
@@ -26,8 +31,8 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "User Already Exists" },
-        { status: 400 },
+        { message: "User Already Exists", exist: true },
+        { status: 409 },
       );
     }
 

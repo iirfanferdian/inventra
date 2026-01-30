@@ -1,4 +1,5 @@
 import { LoaderCircle } from "lucide-react";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useFormContext } from "react-hook-form";
 
@@ -16,6 +17,10 @@ const GoogleAuthButton = () => {
         className="absolute top-1/2 -translate-y-1/2 left-3"
       />
       <button
+        onClick={async () =>
+          await signIn("google", { redirectTo: "/dashboard" })
+        }
+        type="button"
         disabled={isSubmitting}
         className={`w-full ${isSubmitting ? "bg-gray-300" : "bg-background"} flex justify-center p-2 shadow-md rounded-md hover:bg-foreground/2 text-foreground text-sm font-medium`}
       >

@@ -5,10 +5,9 @@ const page = async () => {
   const session = await auth();
 
   if (!session) {
-    return redirect("/login");
+    redirect("/login");
   }
-
-  return <h1 className="">{JSON.stringify(session)}</h1>;
+  return <h1>{session?.user?.name}</h1>;
 };
 
 export default page;

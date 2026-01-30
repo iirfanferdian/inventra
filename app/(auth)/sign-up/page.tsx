@@ -1,12 +1,17 @@
 "use client";
 import GoogleAuthButton from "@/components/GoogleAuthButton";
 import Input from "@/components/Input";
+
 import { LoaderCircle, Lock, Mail, User } from "lucide-react";
-import Image from "next/image";
+import { signIn } from "next-auth/react";
+
 import Link from "next/link";
+import { useState } from "react";
 import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
 
 const SignInPage = () => {
+  const [error, setError] = useState("");
+
   interface IForm {
     fullName: string;
     email: string;
@@ -22,8 +27,41 @@ const SignInPage = () => {
   } = methods;
 
   const passwordValue = watch("password");
-  const onSubmit: SubmitHandler<IForm> = (data) => {
-    console.log("test");
+  const onSubmit: SubmitHandler<IForm> = async (data) => {
+    const { email, fullName, password } = data;
+
+    try {
+      const payload = { fullName, email, password };
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const result = await res.json();
+
+      //Check if user already exists
+      if (res.status === 409) {
+        setError(
+          "Email already exist, please sign in with your email or Google",
+        );
+      }
+
+      //Sign in if user already created
+      if (res.status === 201) {
+        await signIn("credentials", {
+          email,
+          password,
+          redirectTo: "/dashboard",
+        });
+      }
+    } catch (error) {
+      console.log("front end error:", error);
+    }
   };
   return (
     <>
@@ -146,15 +184,23 @@ const SignInPage = () => {
                 )}
               </div>
             </div>
+
+            {/* Button Sign Up */}
             <div className="w-full flex flex-col mt-4 justify-center items-end">
+              {error && (
+                <p className="pb-4 w-full text-center leading-3 text-sm text-red-500">
+                  {error}
+                </p>
+              )}
               <button
-                disabled={true}
+                type="submit"
+                disabled={isSubmitting}
                 className={`flex justify-center w-full ${isSubmitting ? "bg-primary/50" : "bg-primary/80"} p-2 rounded-md hover:bg-primary/60 text-primary-foreground text-sm font-medium`}
               >
                 {isSubmitting ? (
                   <LoaderCircle className="animate-spin" size={20} />
                 ) : (
-                  "Sign In"
+                  "Sign Up"
                 )}
               </button>
             </div>

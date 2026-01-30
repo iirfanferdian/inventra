@@ -1,11 +1,17 @@
 "use client";
 import GoogleAuthButton from "@/components/GoogleAuthButton";
 import Input from "@/components/Input";
-import { Lock, Mail } from "lucide-react";
+import { LoaderCircle, Lock, Mail } from "lucide-react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
 
 const LoginPage = () => {
+  const [error, setError] = useState("");
+
+  const router = useRouter();
   interface IForm {
     email: string;
     password: string;
@@ -19,8 +25,20 @@ const LoginPage = () => {
     formState: { errors, isSubmitting },
   } = methods;
 
-  const onSubmit: SubmitHandler<IForm> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<IForm> = async (data) => {
+    const { email, password } = data;
+
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (res?.error) {
+      setError("Email or password is invalid");
+    } else {
+      router.push("/dashboard");
+    }
   };
   return (
     <>
@@ -92,12 +110,26 @@ const LoginPage = () => {
                 )}
               </div>
             </div>
+            {/* Button Sign Up */}
             <div className="w-full flex flex-col mt-4 justify-center items-end">
               <label className="mb-4 text-sm font-medium text-primary/80 hover:underline">
                 Forgot Password?
               </label>
-              <button className="w-full bg-primary/80 p-2 rounded-md hover:bg-primary/60 text-primary-foreground text-sm font-medium ">
-                Sign In
+              {error && (
+                <p className="pb-4 w-full text-center leading-3 text-sm text-red-500">
+                  {error}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`flex justify-center w-full ${isSubmitting ? "bg-primary/50" : "bg-primary/80"} p-2 rounded-md hover:bg-primary/60 text-primary-foreground text-sm font-medium `}
+              >
+                {isSubmitting ? (
+                  <LoaderCircle className="animate-spin" size={20} />
+                ) : (
+                  "Sign In"
+                )}
               </button>
             </div>
           </form>
