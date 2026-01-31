@@ -9,7 +9,7 @@ const InventraLogo = () => {
           <a href="#">
             {/* Logo Aplikasi */}
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Box className="size-4" />
+              <Box className="dark:text-foreground size-4" />
             </div>
 
             {/* Judul & Deskripsi - Otomatis tersembunyi saat collapse */}

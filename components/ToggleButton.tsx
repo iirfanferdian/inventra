@@ -36,7 +36,7 @@ const ToggleButton = () => {
       className="relative overflow-hidden bg-primary/0 hover:bg-primary/10  text-foreground"
     >
       <Sun
-        className={`h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
+        className={`text-muted-foreground h-[1.2rem] w-[1.2rem] transition-all duration-300 ${
           isDark ? "rotate-90 scale-0" : "rotate-0 scale-100"
         }`}
       />
