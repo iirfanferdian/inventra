@@ -9,17 +9,21 @@ import {
 import { LogOutIcon, SettingsIcon, User, UserIcon } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { Button } from "./ui/button";
 
 const UserButton = ({ username }: { username?: string }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="px-2 flex items-center gap-2 hover:bg-primary/10 cursor-pointer p-1 rounded-md ">
+        <Button className="bg-muted-primary p-2 py-5 flex items-center gap-2 hover:bg-muted-foreground/10 cursor-pointer rounded-md text-foreground">
           <div className="bg-primary/80 p-1.5 rounded-full">
-            <User size={20} className="text-primary-foreground" />
+            <User
+              size={20}
+              className="dark:text-foreground text-primary-foreground"
+            />
           </div>
-          <p className="font-sm">{username ? username : "Username"}</p>
-        </button>
+          <span className="font-sm">Username</span>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="">
         <DropdownMenuItem>
