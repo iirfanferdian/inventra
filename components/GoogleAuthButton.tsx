@@ -22,7 +22,7 @@ const GoogleAuthButton = () => {
         }
         type="button"
         disabled={isSubmitting}
-        className={`w-full ${isSubmitting ? "bg-gray-300" : "bg-background"} flex justify-center p-2 shadow-md rounded-md hover:bg-foreground/2 text-foreground text-sm font-medium`}
+        className={`w-full ${isSubmitting ? "bg-gray-300" : "bg-background dark:bg-foreground/10"} flex justify-center p-2 shadow-md rounded-md hover:bg-foreground/2 text-foreground text-sm font-medium`}
       >
         {isSubmitting ? (
           <LoaderCircle className="animate-spin" size={20} />

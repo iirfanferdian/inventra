@@ -123,7 +123,7 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`flex justify-center w-full ${isSubmitting ? "bg-primary/50" : "bg-primary/80"} p-2 rounded-md hover:bg-primary/60 text-primary-foreground text-sm font-medium `}
+                className={`flex justify-center w-full ${isSubmitting ? "bg-primary/50" : "bg-primary/80"} p-2 rounded-md hover:bg-primary/60 text-primary-foreground dark:text-foreground text-sm font-medium `}
               >
                 {isSubmitting ? (
                   <LoaderCircle className="animate-spin" size={20} />
