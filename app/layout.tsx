@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import Providers from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 // 1. Setup Font Utama (UI)
@@ -34,7 +33,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans bg-background antialiased min-h-screen`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Providers>{children}</Providers>
+          {children}
         </ThemeProvider>
       </body>
     </html>
