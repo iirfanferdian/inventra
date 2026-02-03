@@ -20,7 +20,6 @@ const page = async () => {
             <Plus /> Export Report{" "}
           </Button>
         </header>
-
         {/* Cards Section */}
         <ReportCards />
 
