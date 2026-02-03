@@ -6,14 +6,14 @@ import { ThemeProvider } from "@/providers/theme-provider";
 // 1. Setup Font Utama (UI)
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans", // Kita beri nama variabel
+  variable: "--font-sans",
   display: "swap",
 });
 
 // 2. Setup Font Data (SKU/ID/Code)
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono", // Kita beri nama variabel
+  variable: "--font-mono",
   display: "swap",
 });
 
