@@ -172,6 +172,7 @@
       height: 0;
     }
   }
+  --variant-dark: .dark &;
 }
 
 @layer base {

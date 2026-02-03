@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import InventraHeader from "@/components/InventraHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { redirect } from "next/navigation";
+import { SessionProvider } from "next-auth/react";
 
 import React from "react";
 
@@ -16,7 +17,9 @@ const InventraLayout = async ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <AppSidebar />
       <main className="bg-primary/5 w-full min-h-screen">
-        <InventraHeader />
+        <SessionProvider session={session}>
+          <InventraHeader />
+        </SessionProvider>
         {children}
       </main>
     </SidebarProvider>

@@ -10,8 +10,10 @@ import { LogOutIcon, SettingsIcon, User, UserIcon } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { useSession } from "next-auth/react";
 
-const UserButton = ({ username }: { username?: string }) => {
+const UserButton = () => {
+  const { data, status } = useSession();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -22,7 +24,9 @@ const UserButton = ({ username }: { username?: string }) => {
               className="dark:text-foreground text-primary-foreground"
             />
           </div>
-          <span className="font-sm">Username</span>
+          <span className="font-sm">
+            {status === "loading" ? "..." : data?.user?.name}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="">

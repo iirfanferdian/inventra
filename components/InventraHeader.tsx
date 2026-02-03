@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import UserButton from "./UserButton";
-import ToggleButton from "./ToggleButton";
+import { ToggleButton } from "./ToggleButton";
 
 const InventraHeader = () => {
   return (
