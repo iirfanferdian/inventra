@@ -10,7 +10,7 @@ const Security = () => {
           <Shield />
           <h2 className="text-md border-b-0 pb-0">Security Actions</h2>
         </div>
-        <p border-b-0 className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Manage your account security and authentication.
         </p>
       </div>
