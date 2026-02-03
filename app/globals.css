@@ -44,11 +44,14 @@
   --radius: 0.5rem;
 
   /* -- CHART COLORS -- */
-  --chart-1: 221.2 83.2% 53.3%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
+  --chart-1: 221 83% 53%; /* Royal Blue (Dominan) */
+  --chart-2: 173 58% 39%; /* Teal (Sejuk) */
+  --chart-3: 262 83% 58%; /* Purple (Elegan) */
+  --chart-4: 43 96% 64%; /* Amber (Warmth) */
+  --chart-5: 339 90% 60%; /* Rose (Accent) */
+
+  --chart-inflow: 142 76% 36%; /* Emerald Green (Growth/Profit) */
+  --chart-outflow: 0 84% 60%; /* Soft Red (Expense/Danger) */
 
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -80,11 +83,16 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 212.7 26.8% 83.9%;
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
+
+  /* Mode Gelap: Warna dibuat sedikit lebih terang agar menyala */
+  --chart-1: 217 91% 60%;
+  --chart-2: 173 58% 45%;
+  --chart-3: 263 70% 65%;
+  --chart-4: 43 96% 64%;
+  --chart-5: 339 80% 65%;
+
+  --chart-inflow: 142 70% 45%;
+  --chart-outflow: 0 75% 65%;
 
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);

@@ -1,20 +1,19 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import Providers from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 // 1. Setup Font Utama (UI)
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans", // Kita beri nama variabel
+  variable: "--font-sans",
   display: "swap",
 });
 
 // 2. Setup Font Data (SKU/ID/Code)
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono", // Kita beri nama variabel
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -34,7 +33,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans bg-background antialiased min-h-screen`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Providers>{children}</Providers>
+          {children}
         </ThemeProvider>
       </body>
     </html>
