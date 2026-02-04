@@ -1,14 +1,12 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Box, Package } from "lucide-react";
+import { Package } from "lucide-react";
 
 const invoices = [
   {

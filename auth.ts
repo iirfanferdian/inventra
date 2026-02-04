@@ -50,6 +50,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      // If 'user' exists, it means this is the initial login moment
+      if (user) {
+        token.id = user.id; // We save the DB id into the encrypted token
+      }
+      return token; // The token is now saved in the user's browser cookie
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
   pages: { signIn: "/login", signOut: "/logout", error: "/error" },
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET,

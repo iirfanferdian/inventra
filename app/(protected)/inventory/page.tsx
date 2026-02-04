@@ -5,6 +5,7 @@ import { FilterDropdown } from "./(components)/FilterDropdown";
 import { CategoriesDropdown } from "./(components)/CategoriesDropdown";
 import { ItemsTable } from "./(components)/ItemsTable";
 import { PaginationButton } from "./(components)/PaginationButton";
+import { NewItemButton } from "./(components)/AddNewItemButton";
 
 const page = async () => {
   return (
@@ -17,9 +18,7 @@ const page = async () => {
               Manage your products and stock levels
             </p>
           </div>
-          <Button className="bg-primary hover:bg-primary/80 dark:text-foreground ">
-            <Plus /> Add New Item{" "}
-          </Button>
+          <NewItemButton />
         </header>
 
         {/* Section */}
