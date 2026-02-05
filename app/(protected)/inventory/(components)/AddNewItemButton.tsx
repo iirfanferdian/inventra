@@ -1,4 +1,5 @@
 "use client";
+import { addNewItem } from "@/app/actions/items";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,7 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { ItemQueryOptions } from "@/hooks/queries/use-items";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader, LoaderCircle, Plus } from "lucide-react";
+import { useState } from "react";
 
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 
@@ -35,31 +39,48 @@ export function NewItemButton() {
   } = useForm<IAddItem>({ mode: "onSubmit", criteriaMode: "firstError" });
 
   const Categories = [
-    { label: "Electronics", value: "electronics" },
-    { label: "Audio", value: "audio" },
-    { label: "Accessories", value: "accessories" },
-    { label: "Monitors", value: "monitors" },
-    { label: "Storage", value: "storage" },
-    { label: "Networking", value: "networking" },
+    { label: "Electronics", value: "Electronics" },
+    { label: "Audio", value: "Audio" },
+    { label: "Accessories", value: "Accessories" },
+    { label: "Monitors", value: "Monitors" },
+    { label: "Storage", value: "Storage" },
+    { label: "Networking", value: "Networking" },
   ] as const;
 
   interface IAddItem {
     item: string;
-    code: string;
+    sku: string;
     description?: string;
     category?: string;
     stock: number;
-    minstock?: number;
+    minStock?: number;
     price: number;
   }
 
+  const [open, setOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: (data: IAddItem) => addNewItem(data),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: ItemQueryOptions.all().queryKey,
+      });
+      setOpen(false);
+      reset();
+    },
+  });
+
   const onSubmit: SubmitHandler<IAddItem> = async (data) => {
-    console.log(data);
+    mutate(data);
   };
 
   return (
     <Dialog
+      open={open}
       onOpenChange={(open) => {
+        setOpen(open);
         if (!open) {
           reset();
         }
@@ -103,20 +124,20 @@ export function NewItemButton() {
                 )}
               </Field>
               <Field>
-                <Label htmlFor="code">SKU/Code*</Label>
+                <Label htmlFor="sku">SKU/Code*</Label>
                 <Input
-                  id="code"
+                  id="sku"
                   placeholder="MBP-14 M3"
-                  {...register("code", {
+                  {...register("sku", {
                     required: {
                       value: true,
                       message: "Please fill out this field",
                     },
                   })}
                 />
-                {errors?.code?.message && (
+                {errors?.sku?.message && (
                   <p className="leading-3 text-sm text-red-500">
-                    {errors.code.message}
+                    {errors.sku.message}
                   </p>
                 )}
               </Field>
@@ -132,6 +153,7 @@ export function NewItemButton() {
                   placeholder="Brief description of the item..."
                   rows={4}
                   className="min-h-24 resize-none"
+                  {...register("description", { required: false })}
                 />
               </InputGroup>
             </Field>
@@ -171,6 +193,7 @@ export function NewItemButton() {
                   id="stock"
                   type="number"
                   placeholder="0"
+                  min={0}
                   {...register("stock", {
                     required: "Stock is required",
                     valueAsNumber: true,
@@ -194,7 +217,8 @@ export function NewItemButton() {
                   id="minStock"
                   type="number"
                   placeholder="5"
-                  {...register("minstock", {
+                  min={0}
+                  {...register("minStock", {
                     valueAsNumber: true,
                     min: { value: 0, message: "Min Stock cannot be negative" },
                   })}
@@ -210,14 +234,17 @@ export function NewItemButton() {
                 <Input
                   id="price"
                   type="number"
-                  placeholder="100000"
+                  step="any" // Memungkinkan input desimal
+                  placeholder="5.0"
+                  min={0}
                   {...register("price", {
-                    required: "Price is required",
+                    required: { value: true, message: "Price is required" },
                     valueAsNumber: true,
-                    min: { value: 0, message: "Price must be at least 0" },
+                    min: { value: 0, message: "Min Price cannot be negative" },
                   })}
                   onKeyDown={(e) => {
-                    if (e.key === "-" || e.key === "e") e.preventDefault();
+                    // Hapus pembatasan "." dan "," agar user bisa mengetik desimal
+                    if (["e", "-", "+"].includes(e.key)) e.preventDefault();
                   }}
                 />
                 {errors?.price?.message && (
@@ -235,9 +262,14 @@ export function NewItemButton() {
             <Button
               type="submit"
               variant="outline"
+              disabled={isPending}
               className="bg-primary text-primary-foreground dark:bg-primary dark:text-foreground hover:bg-primary/80 hover:text-primary-foreground dark:hover:bg-primary/80 dark:hover:text-foreground"
             >
-              Save changes
+              {isPending ? (
+                <LoaderCircle className="animate-spin" size={20} />
+              ) : (
+                "Save changes"
+              )}
             </Button>
           </DialogFooter>
         </form>

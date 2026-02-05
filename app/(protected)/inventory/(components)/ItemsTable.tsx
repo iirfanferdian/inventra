@@ -1,3 +1,5 @@
+"use client";
+import { deleteItem } from "@/app/actions/items";
 import {
   Table,
   TableBody,
@@ -6,44 +8,44 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Package } from "lucide-react";
 
-const invoices = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-];
+import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
+import { Button } from "@/components/ui/button";
+
+import { ItemQueryOptions } from "@/hooks/queries/use-items";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { LoaderCircle, Package, Trash2 } from "lucide-react";
+import AlertWindow from "./AlertWindow";
 
 export function ItemsTable() {
+  const queryClient = useQueryClient();
+
+  // Ambil data
+  const { data, isPending: queryPending } = useQuery(ItemQueryOptions.all());
+
+  // Mutasi Delete
+  const { mutate, isPending, variables } = useMutation({
+    mutationFn: (itemId: string) => deleteItem(itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ItemQueryOptions.all().queryKey,
+      });
+    },
+  });
+
+  // 1. Handling Loading State (Lebih bersih jika dipisah atau pakai ternary yang benar)
+  if (queryPending) {
+    return (
+      <div className="w-full h-64 flex flex-col items-center justify-center gap-4">
+        <LoaderCircle className="animate-spin text-primary" size={60} />
+        <p className="text-muted-foreground animate-pulse">Loading items...</p>
+      </div>
+    );
+  }
+
   return (
-    <Table className="rounded-lg bg-background">
+    <Table className="rounded-lg bg-background border">
       <TableHeader>
         <TableRow>
           <TableHead>Item</TableHead>
@@ -55,29 +57,81 @@ export function ItemsTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {invoices.map((invoice) => (
-          <TableRow key={invoice.invoice}>
-            <TableCell className="font-medium flex gap-2">
-              <Package
-                size={35}
-                className="p-1 text-muted-foreground bg-muted-foreground/20 rounded-lg"
-              />{" "}
-              <div className="flex flex-col">
-                {invoice.invoice}
-                <span className="text-xs text-muted-foreground">
-                  Category of the items
-                </span>
-              </div>
+        {data?.length === 0 ? (
+          <TableRow>
+            <TableCell
+              colSpan={6}
+              className="text-center py-10 text-muted-foreground"
+            >
+              No items found.
             </TableCell>
-            <TableCell>{invoice.paymentStatus}</TableCell>
-            <TableCell>{invoice.paymentMethod}</TableCell>
-            <TableCell>{invoice.paymentMethod}</TableCell>
-            <TableCell className="text-right">
-              {invoice.paymentMethod}
-            </TableCell>
-            <TableCell className="text-right">{invoice.totalAmount}</TableCell>
           </TableRow>
-        ))}
+        ) : (
+          data?.map((item) => {
+            // Cek apakah item ini sedang dalam proses delete
+            const isDeleting = isPending && variables === item.id;
+
+            return (
+              <TableRow
+                key={item.id}
+                className={isDeleting ? "opacity-50" : ""}
+              >
+                <TableCell className="font-medium flex gap-2">
+                  <Package
+                    size={35}
+                    className="p-1 text-muted-foreground bg-muted-foreground/20 rounded-lg"
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-semibold">{item.name}</span>
+                    <span className="text-xs text-muted-foreground line-clamp-1">
+                      {item.description || "No description"}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>{item.sku}</TableCell>
+                <TableCell>
+                  {item.category?.name || (
+                    <span className="text-muted-foreground italic text-xs">
+                      Uncategorized
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>{item.currentStock}</TableCell>
+                <TableCell className="text-right">
+                  {/* Pastikan formatting harga rapi */}
+                  {new Intl.NumberFormat("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                  }).format(item.price)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end items-center gap-2">
+                    {isPending && variables === item.id ? (
+                      <LoaderCircle
+                        className="animate-spin text-muted-foreground"
+                        size={18}
+                      />
+                    ) : (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          {/* Tombol pemicu dialog */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 size={18} />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertWindow item={item} mutate={mutate} />
+                      </AlertDialog>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })
+        )}
       </TableBody>
     </Table>
   );

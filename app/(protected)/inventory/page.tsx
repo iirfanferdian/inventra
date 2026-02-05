@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { SidebarCollapseButton } from "@/components/ui/SidebarCollapseButton";
-import { Download, Plus, Search } from "lucide-react";
+import { Download, LoaderCircle, Plus, Search } from "lucide-react";
 import { FilterDropdown } from "./(components)/FilterDropdown";
 import { CategoriesDropdown } from "./(components)/CategoriesDropdown";
 import { ItemsTable } from "./(components)/ItemsTable";
@@ -44,12 +44,13 @@ const page = async () => {
           </div>
         </section>
         <ItemsTable />
-        <footer className="w-full flex justify-between my-3">
+
+        {/* <footer className="w-full flex justify-between my-3">
           <p>Showing 1 to 5 of 8 items</p>
           <div>
             <PaginationButton />
           </div>
-        </footer>
+        </footer> */}
         <div className="bottom-10 absolute md:hidden lg:hidden">
           <SidebarCollapseButton className="fixed" mode="mobile" />
         </div>
