@@ -68,8 +68,17 @@ export function NewItemButton() {
 
   const queryClient = useQueryClient();
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: (data: IAddItem) => addNewItem(data),
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: async (data: IAddItem) => {
+      const result = await addNewItem(data);
+      console.log(result);
+      if (!result.success) {
+        throw result;
+      }
+
+      return result;
+    },
+    onError: (res: any) => {},
     onSuccess: async (data, variables, context) => {
       await Promise.all([
         queryClient.invalidateQueries({
@@ -268,6 +277,11 @@ export function NewItemButton() {
               </Field>
             </div>
           </FieldGroup>
+          {error && (
+            <p className="leading-3 mt-2 text-sm text-red-500">
+              {error.message}
+            </p>
+          )}
           <DialogFooter className="mt-4">
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>

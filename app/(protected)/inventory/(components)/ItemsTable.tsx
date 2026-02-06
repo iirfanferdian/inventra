@@ -66,7 +66,7 @@ export function ItemsTable() {
   const processedItems = useMemo(() => {
     if (!data) return [];
 
-    // Get the format data
+    // Get the formated data
     const mapped = data.map((item) => {
       // get the data min stock
       const effectiveMinStock = item.minStock || 5;

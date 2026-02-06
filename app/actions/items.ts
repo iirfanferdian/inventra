@@ -6,37 +6,51 @@ import { prisma } from "@/lib/prisma";
 export const addNewItem = async (req: any) => {
   const session = await auth();
   const { item, sku, stock, minStock, price, category, description } = req;
-  console.log(category);
 
-  await prisma.item.create({
-    data: {
-      name: item,
-      sku,
-      currentStock: stock,
-      minStock: minStock || 0,
-      price,
-      description,
-      user: {
-        connect: { id: session?.user?.id },
-      },
-      ...(category && {
-        category: {
-          connectOrCreate: {
-            where: {
-              name_userId: {
+  try {
+    await prisma.item.create({
+      data: {
+        name: item,
+        sku,
+        currentStock: stock,
+        minStock: minStock || 0,
+        price,
+        description,
+        user: {
+          connect: { id: session?.user?.id },
+        },
+        ...(category && {
+          category: {
+            connectOrCreate: {
+              where: {
+                name_userId: {
+                  name: category,
+                  userId: session?.user?.id,
+                },
+              },
+              create: {
                 name: category,
                 userId: session?.user?.id,
               },
             },
-            create: {
-              name: category,
-              userId: session?.user?.id,
-            },
           },
-        },
-      }),
-    },
-  });
+        }),
+      },
+    });
+    return { success: true, message: "Item Created Successfully" };
+  } catch (e) {
+    // Error yang berasal dari database (misal: constraint violation)
+    if (e.code === "P2002") {
+      return {
+        success: false,
+        message: `This item with spesific SKU already created`,
+      };
+    }
+    return {
+      success: false,
+      message: "Terjadi kesalahan sistem yang tidak terduga.",
+    };
+  }
 };
 
 export const getItems = async (filters: {
