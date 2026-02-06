@@ -39,13 +39,25 @@ export const addNewItem = async (req: any) => {
   });
 };
 
-export const getItems = async () => {
+export const getItems = async (filters: {
+  category: string;
+  status: string;
+}) => {
   const session = await auth();
   const items = await prisma.item.findMany({
-    where: { userId: session?.user?.id },
+    where: {
+      userId: session?.user?.id,
+      category:
+        filters.category === "all"
+          ? undefined
+          : {
+              name: filters.category,
+            },
+    },
     include: { category: true },
     orderBy: { createdAt: "desc" },
   });
+  console.log("dia ambil data");
   // Map data untuk mengubah Decimal & Date menjadi Plain Types
   return items.map((item) => ({
     ...item,
@@ -57,4 +69,15 @@ export const getItems = async () => {
 
 export const deleteItem = async (itemId) => {
   await prisma.item.delete({ where: { id: itemId } });
+};
+
+export const getItemCategory = async () => {
+  const session = await auth();
+
+  const categories = await prisma.category.findMany({
+    where: { userId: session?.user?.id, items: { some: {} } },
+    orderBy: { name: "desc" },
+  });
+
+  return categories;
 };

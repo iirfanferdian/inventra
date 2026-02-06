@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { SidebarCollapseButton } from "./ui/SidebarCollapseButton";
 import InventraLogo from "./InventraLogo";
+import Link from "next/link";
 
 // Menu items.
 const items = [
@@ -75,10 +76,10 @@ export function AppSidebar() {
                       tooltip={item.title}
                       asChild
                     >
-                      <a href={item.url}>
+                      <Link href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

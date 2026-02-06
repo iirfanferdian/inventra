@@ -1,52 +1,57 @@
 "use client";
 
-import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Filter } from "lucide-react";
+import { ChevronDown, ListFilter } from "lucide-react";
+import { useState } from "react";
 
 export function FilterDropdown() {
-  const [showStatusBar, setShowStatusBar] = React.useState(true);
-  const [showActivityBar, setShowActivityBar] = React.useState(false);
-  const [showPanel, setShowPanel] = React.useState(false);
+  const [filter, setFilter] = useState("all");
+
+  const filterLabels: Record<string, string> = {
+    all: "All Status",
+    inStock: "In Stock",
+    lowStock: "Low Stock",
+    outStock: "Out of Stock",
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="hover:bg-background bg-background text-sm text-foreground h-full flex rounded-md">
-          <Filter /> Filter <ChevronDown />
+        <Button
+          variant="outline"
+          className="h-full w-[160px] justify-between font-medium focus-visible:ring-0"
+        >
+          <div className="flex items-center gap-2 overflow-hidden">
+            <ListFilter className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">{filterLabels[filter]}</span>
+          </div>
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-          <DropdownMenuCheckboxItem
-            checked={showStatusBar ?? false}
-            onCheckedChange={setShowStatusBar}
-          >
-            Status Bar
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={showActivityBar}
-            onCheckedChange={setShowActivityBar}
-            disabled
-          >
-            Activity Bar
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={showPanel}
-            onCheckedChange={setShowPanel}
-          >
-            Panel
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuGroup>
+
+      {/* Perubahan: w-[--radix-dropdown-menu-trigger-width] agar lebar menu sama dengan tombol */}
+      <DropdownMenuContent className="w-[160px]" align="start">
+        <DropdownMenuRadioGroup value={filter} onValueChange={setFilter}>
+          <DropdownMenuRadioItem value="all" className="cursor-pointer">
+            All Status
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="inStock" className="cursor-pointer">
+            In Stock
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="lowStock" className="cursor-pointer">
+            Low Stock
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="outStock" className="cursor-pointer">
+            Out of Stock
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

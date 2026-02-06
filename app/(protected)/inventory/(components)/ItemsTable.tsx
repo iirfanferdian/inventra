@@ -17,29 +17,39 @@ import { ItemQueryOptions } from "@/hooks/queries/use-items";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle, Package, Trash2 } from "lucide-react";
 import AlertWindow from "./AlertWindow";
+import { useSearchParams } from "next/navigation";
 
 export function ItemsTable() {
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
 
-  // Ambil data
-  const { data, isPending: queryPending } = useQuery(ItemQueryOptions.all());
+  // Take category params URL, default "all"
+  const category = searchParams.get("category") || undefined;
 
-  // Mutasi Delete
+  //Insert category params in here
+  const { data, isPending: queryPending } = useQuery(
+    ItemQueryOptions.all({ category }),
+  );
+
+  // Delete Item Mutation
   const { mutate, isPending, variables } = useMutation({
     mutationFn: (itemId: string) => deleteItem(itemId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ItemQueryOptions.all().queryKey,
-      });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["items"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["category"],
+        }),
+      ]);
     },
   });
 
-  // 1. Handling Loading State (Lebih bersih jika dipisah atau pakai ternary yang benar)
   if (queryPending) {
     return (
-      <div className="w-full h-64 flex flex-col items-center justify-center gap-4">
+      <div className="w-full h-64 flex flex-col items-center justify-center">
         <LoaderCircle className="animate-spin text-primary" size={60} />
-        <p className="text-muted-foreground animate-pulse">Loading items...</p>
       </div>
     );
   }

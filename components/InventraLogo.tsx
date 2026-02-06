@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 import { Box } from "lucide-react";
 
@@ -6,7 +7,7 @@ const InventraLogo = () => {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" asChild>
-          <a href="#">
+          <Link href="#">
             {/* Logo Aplikasi */}
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Box className="dark:text-foreground size-4" />
@@ -19,7 +20,7 @@ const InventraLogo = () => {
                 Enterprise Edition
               </span>
             </div>
-          </a>
+          </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>

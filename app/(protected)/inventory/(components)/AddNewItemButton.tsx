@@ -22,9 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ItemQueryOptions } from "@/hooks/queries/use-items";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader, LoaderCircle, Plus } from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 import { useState } from "react";
 
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
@@ -63,10 +62,16 @@ export function NewItemButton() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: IAddItem) => addNewItem(data),
-    onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({
-        queryKey: ItemQueryOptions.all().queryKey,
-      });
+    onSuccess: async (data, variables, context) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["items"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["category"],
+        }),
+      ]);
+
       setOpen(false);
       reset();
     },
