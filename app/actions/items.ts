@@ -57,12 +57,11 @@ export const getItems = async (filters: {
     include: { category: true },
     orderBy: { createdAt: "desc" },
   });
-  console.log("dia ambil data");
-  // Map data untuk mengubah Decimal & Date menjadi Plain Types
+  // Map the data for Decimal & Date to Plain Types
   return items.map((item) => ({
     ...item,
-    price: item.price.toNumber(), // Ubah Decimal ke Number
-    createdAt: item.createdAt.toISOString(), // Ubah Date ke String
+    price: item.price.toNumber(),
+    createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),
   }));
 };

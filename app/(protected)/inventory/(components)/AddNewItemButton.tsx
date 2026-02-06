@@ -35,7 +35,15 @@ export function NewItemButton() {
     control,
     reset,
     formState: { errors },
-  } = useForm<IAddItem>({ mode: "onSubmit", criteriaMode: "firstError" });
+  } = useForm<IAddItem>({
+    mode: "onSubmit",
+    criteriaMode: "firstError",
+    defaultValues: {
+      minStock: 5,
+      stock: 0,
+      price: 0,
+    },
+  });
 
   const Categories = [
     { label: "Electronics", value: "Electronics" },
