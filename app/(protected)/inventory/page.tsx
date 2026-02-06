@@ -5,6 +5,7 @@ import { FilterDropdown } from "./(components)/FilterDropdown";
 import { CategoriesDropdown } from "./(components)/CategoriesDropdown";
 import { ItemsTable } from "./(components)/ItemsTable";
 import { NewItemButton } from "./(components)/AddNewItemButton";
+import SearchItemInput from "./(components)/SearchItemInput";
 
 const page = async () => {
   return (
@@ -23,16 +24,7 @@ const page = async () => {
         {/* Section */}
         <section className="flex my-6 w-full">
           <div className="flex w-3/4 items-center gap-4">
-            <div className="relative w-full">
-              <Search
-                size={16}
-                className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <input
-                className="bg-background rounded-md pl-8 py-3 w-full outline-none ring-offset-2 focus:ring-primary focus:ring-2 text-muted-foreground text-sm"
-                placeholder="Search by name or SKU..."
-              />
-            </div>
+            <SearchItemInput />
             <FilterDropdown />
             <CategoriesDropdown />
           </div>

@@ -44,6 +44,7 @@ export function ItemsTable() {
   // Get URL PARAMS
   const category = searchParams.get("category") || undefined;
   const statusFilter = searchParams.get("status") || "all";
+  const searchValue = searchParams.get("q") || undefined;
 
   // Fetch Data
   const { data, isPending: queryPending } = useQuery(
@@ -97,11 +98,26 @@ export function ItemsTable() {
         }).format(Number(item.price)),
       };
     });
+    //Set filtered to clean data without filter
+    let filtered = mapped;
+    // Then check Filter By statusFilter from URL if it's not all add the status filter to filtered var
+    if (statusFilter !== "all") {
+      filtered = mapped.filter((item) => item.statusKey === statusFilter);
+    }
 
-    // Then check Filter By statusFilter from URL
-    if (statusFilter === "all") return mapped;
-    return mapped.filter((item) => item.statusKey === statusFilter);
-  }, [data, statusFilter]);
+    // Check if params of searchValue {"q?"} exists, then add the filter it and overwrite to filtered value
+    if (searchValue) {
+      const lowerQuery = searchValue.toLowerCase();
+      filtered = filtered.filter(
+        (item) =>
+          item.name.toLocaleLowerCase().includes(lowerQuery) ||
+          item.sku.toLocaleLowerCase().includes(lowerQuery),
+      );
+    }
+
+    //Return the result filtered
+    return filtered;
+  }, [data, statusFilter, searchValue]);
 
   // Loader if query of getting items is pending
   if (queryPending) {
@@ -144,12 +160,12 @@ export function ItemsTable() {
               </TableCell>
             </TableRow>
           ) : (
-            processedItems.map((item) => {
+            processedItems?.map((item) => {
               const isDeleting = isPending && variables === item.id;
 
               return (
                 <TableRow
-                  key={item.id}
+                  key={item?.id}
                   className={isDeleting ? "opacity-40 select-none" : ""}
                 >
                   {/* Info Product */}
@@ -160,23 +176,23 @@ export function ItemsTable() {
                       </div>
                       <div className="flex flex-col">
                         <span className="font-bold leading-none mb-1">
-                          {item.name}
+                          {item?.name}
                         </span>
                         <span className="text-xs text-muted-foreground line-clamp-1 italic">
-                          {item.description || "No description provided"}
+                          {item?.description || "No description provided"}
                         </span>
                       </div>
                     </div>
                   </TableCell>
 
                   <TableCell className="font-mono text-xs uppercase tracking-wider">
-                    {item.sku}
+                    {item?.sku}
                   </TableCell>
 
                   <TableCell>
-                    {item.category?.name ? (
+                    {item?.category?.name ? (
                       <Badge variant="outline" className="font-medium">
-                        {item.category.name}
+                        {item?.category?.name}
                       </Badge>
                     ) : (
                       <span className="text-xs text-muted-foreground italic">
@@ -189,22 +205,22 @@ export function ItemsTable() {
                   <TableCell>
                     <div className="flex justify-between items-center mb-1.5">
                       <span className="text-xs font-semibold">
-                        {item.currentStock}{" "}
+                        {item?.currentStock}{" "}
                         <span className="text-muted-foreground font-normal">
                           units
                         </span>
                       </span>
                       <Badge
-                        className={`${item.status.color} border-none text-[10px] px-2 h-5`}
+                        className={`${item?.status?.color} border-none text-[10px] px-2 h-5`}
                       >
-                        {item.status.label}
+                        {item?.status?.label}
                       </Badge>
                     </div>
-                    <Progress value={item.progressValue} className="h-1.5" />
+                    <Progress value={item?.progressValue} className="h-1.5" />
                   </TableCell>
 
                   <TableCell className="text-right font-semibold">
-                    {item.formattedPrice}
+                    {item?.formattedPrice}
                   </TableCell>
 
                   {/* Actions */}

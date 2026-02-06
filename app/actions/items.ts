@@ -53,10 +53,7 @@ export const addNewItem = async (req: any) => {
   }
 };
 
-export const getItems = async (filters: {
-  category: string;
-  status: string;
-}) => {
+export const getItems = async (filters: { category: string }) => {
   const session = await auth();
   const items = await prisma.item.findMany({
     where: {
