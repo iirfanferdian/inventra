@@ -4,6 +4,7 @@ import { Download, Plus } from "lucide-react";
 import TransactionCards from "./(components)/TransactionCards";
 import { TransactionsFilter } from "./(components)/TransactionsFilter";
 import { TransactionsTable } from "./(components)/TransactionsTable";
+import { AddNewTransactionButton } from "./(components)/AddNewTransactionButton";
 
 const page = async () => {
   return (
@@ -16,9 +17,7 @@ const page = async () => {
               Track all stock movements and financial transactions
             </p>
           </div>
-          <Button className="bg-primary hover:bg-primary/80 dark:text-foreground ">
-            <Plus /> Record Transactions{" "}
-          </Button>
+          <AddNewTransactionButton />
         </header>
         {/* Cards Section */}
         <TransactionCards />
