@@ -82,7 +82,7 @@ export function AddNewTransactionButton() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["items"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
       setOpen(false);
       reset();
     },

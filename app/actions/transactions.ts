@@ -14,38 +14,41 @@ export const createTransaction = async (req: any) => {
   const operationValue = type === "IN" ? quantityItem : -quantityItem;
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      await tx.transaction.create({
-        data: {
-          itemId,
-          priceAtTransaction: price,
-          type,
-          note,
-          quantity: quantityItem,
-          userId: session.user?.id as string,
-          createdAt: new Date(date),
-        },
-      });
+    const result = await prisma.$transaction(
+      async (tx) => {
+        await tx.transaction.create({
+          data: {
+            itemId,
+            priceAtTransaction: price,
+            type,
+            note,
+            quantity: quantityItem,
+            userId: session.user?.id as string,
+            createdAt: new Date(date),
+          },
+        });
 
-      const updateItem = await tx.item.update({
-        where: {
-          id: itemId,
-          userId: session.user?.id,
-        },
-        data: { currentStock: { increment: operationValue } },
-      });
+        const updateItem = await tx.item.update({
+          where: {
+            id: itemId,
+            userId: session.user?.id,
+          },
+          data: { currentStock: { increment: operationValue } },
+        });
 
-      // Validasi Stok Minus
-      if (updateItem.currentStock < 0) {
-        throw new Error("OUT_OF_STOCK");
-      }
+        // Validasi Stok Minus
+        if (updateItem.currentStock < 0) {
+          throw new Error("OUT_OF_STOCK");
+        }
 
-      return {
-        ...updateItem,
-        price: updateItem.price?.toNumber() || 0,
-        currentStock: updateItem.currentStock,
-      };
-    });
+        return {
+          ...updateItem,
+          price: updateItem.price?.toNumber() || 0,
+          currentStock: updateItem.currentStock,
+        };
+      },
+      { timeout: 10000 },
+    );
 
     return { success: true, message: "Transaction Create Successfully" };
   } catch (e: any) {

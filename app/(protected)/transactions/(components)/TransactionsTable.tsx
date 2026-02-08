@@ -17,10 +17,12 @@ import { Badge } from "@/components/ui/badge";
 
 const TYPE_CONFIG = {
   IN: {
+    key: "IN",
     label: "Stock In",
     color: "text-green-400 bg-green-500/10 dark:bg-green-500/30",
   },
   OUT: {
+    key: "OUT",
     label: "Stock Out",
     color: "text-red-400 bg-red-500/10 dark:bg-red-500/30",
   },
@@ -46,8 +48,17 @@ export function TransactionsTable() {
         maximumFractionDigits: 0,
       }).format(Number(transaction.priceAtTransaction)),
     }));
-    return formattedData;
-  }, [data]);
+
+    let filtered = formattedData;
+
+    if (type) {
+      filtered = formattedData.filter(
+        (transaction) => transaction.type.key === type,
+      );
+    }
+
+    return filtered;
+  }, [data, type]);
 
   return (
     <Table className="rounded-lg bg-background">
