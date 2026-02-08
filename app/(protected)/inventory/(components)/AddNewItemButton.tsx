@@ -68,10 +68,14 @@ export function NewItemButton() {
 
   const queryClient = useQueryClient();
 
-  const { mutate, isPending, error } = useMutation({
+  const {
+    mutate,
+    isPending,
+    error,
+    reset: resetMutation,
+  } = useMutation({
     mutationFn: async (data: IAddItem) => {
       const result = await addNewItem(data);
-      console.log(result);
       if (!result.success) {
         throw result;
       }
@@ -105,6 +109,7 @@ export function NewItemButton() {
         setOpen(open);
         if (!open) {
           reset();
+          resetMutation();
         }
       }}
     >

@@ -48,7 +48,7 @@ export const addNewItem = async (req: any) => {
     }
     return {
       success: false,
-      message: "Terjadi kesalahan sistem yang tidak terduga.",
+      message: "Unknown System Error",
     };
   }
 };

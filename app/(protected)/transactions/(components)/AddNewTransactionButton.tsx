@@ -1,4 +1,5 @@
 "use client";
+import { createTransaction } from "@/app/actions/transactions";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -28,25 +29,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ItemQueryOptions } from "@/hooks/queries/use-items";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ChevronDownIcon, Plus } from "lucide-react";
+import { ChevronDownIcon, LoaderCircle, Plus } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 interface IAddTransaction {
   itemId: string;
   type: string;
-  quantity: number;
+  quantityItem: number;
   price?: number;
   date?: Date;
-  notes?: string;
+  note?: string;
 }
 
 export function AddNewTransactionButton() {
   const [open, setOpen] = useState(false);
 
-  const { data: itemData } = useQuery(ItemQueryOptions.all());
+  const { data: itemData = [] } = useQuery(ItemQueryOptions.all());
+
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -59,15 +62,34 @@ export function AddNewTransactionButton() {
     defaultValues: {
       itemId: "", // Tambahkan ini agar tidak undefined
       type: "", // Tambahkan ini agar tidak undefined
-      quantity: 0, // Standarkan ke 0 agar tidak NaN
+      quantityItem: 0, // Standarkan ke 0 agar tidak NaN
       price: 0,
       date: new Date(),
-      notes: "",
+      note: "",
     },
   });
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const {
+    mutate,
+    isPending,
+    error,
+    reset: resetMutation,
+  } = useMutation({
+    mutationFn: async (data) => {
+      const result = await createTransaction(data);
+      if (!result.success) {
+        throw result;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+      setOpen(false);
+      reset();
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    mutate(data);
   };
 
   return (
@@ -77,6 +99,7 @@ export function AddNewTransactionButton() {
         setOpen(open);
         if (!open) {
           reset();
+          resetMutation();
         }
       }}
     >
@@ -119,9 +142,9 @@ export function AddNewTransactionButton() {
                           </SelectItem>
                         ))}
                     </SelectContent>
-                    {errors?.item?.message && (
+                    {errors?.itemId?.message && (
                       <p className="leading-3 text-sm text-red-500">
-                        {errors?.item?.message}
+                        {errors?.itemId?.message}
                       </p>
                     )}
                   </Select>
@@ -162,13 +185,13 @@ export function AddNewTransactionButton() {
             {/* Quantity and Price */}
             <div className="grid grid-cols-2 gap-3">
               <Field>
-                <Label htmlFor="quantity">Quantity*</Label>
+                <Label htmlFor="quantityItem">Quantity*</Label>
                 <Input
-                  id="quantity"
+                  id="quantityItem"
                   type="number"
                   placeholder="0"
                   min={0}
-                  {...register("quantity", {
+                  {...register("quantityItem", {
                     required: "Quantity is required",
                     valueAsNumber: true,
                     min: { value: 1, message: "Min 1" },
@@ -177,9 +200,9 @@ export function AddNewTransactionButton() {
                     if (e.key === "-" || e.key === "e") e.preventDefault();
                   }}
                 />
-                {errors?.quantity?.message && (
+                {errors?.quantityItem?.message && (
                   <p className="leading-3 text-sm text-red-500">
-                    {errors?.quantity?.message}
+                    {errors?.quantityItem?.message}
                   </p>
                 )}
               </Field>
@@ -188,6 +211,7 @@ export function AddNewTransactionButton() {
                 <Input
                   id="price"
                   type="number"
+                  step="any" //Change to decimal cuz the database in decimal
                   placeholder="0"
                   min={0}
                   {...register("price", {
@@ -251,6 +275,11 @@ export function AddNewTransactionButton() {
                   {...register("note", { required: false })}
                 />
               </InputGroup>
+              {error && (
+                <p className="leading-1 text-sm text-red-500">
+                  {error.message}
+                </p>
+              )}
             </Field>
           </FieldGroup>
           <DialogFooter className="mt-4">
@@ -262,7 +291,11 @@ export function AddNewTransactionButton() {
               variant="outline"
               className="bg-primary text-primary-foreground dark:bg-primary dark:text-foreground hover:bg-primary/80 hover:text-primary-foreground dark:hover:bg-primary/80 dark:hover:text-foreground"
             >
-              Save changes
+              {isPending ? (
+                <LoaderCircle className="animate-spin" size={20} />
+              ) : (
+                "Save changes"
+              )}
             </Button>
           </DialogFooter>
         </form>
