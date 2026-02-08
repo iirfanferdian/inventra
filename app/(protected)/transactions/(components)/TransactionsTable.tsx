@@ -75,8 +75,8 @@ export function TransactionsTable() {
           <TableHead>Date</TableHead>
           <TableHead>Item</TableHead>
           <TableHead>Type</TableHead>
-          <TableHead className="text-right">Quantity</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
+          <TableHead className="text-center">Quantity</TableHead>
+          <TableHead className="w-[200px] text-right">Amount</TableHead>
           <TableHead>Notes</TableHead>
         </TableRow>
       </TableHeader>
@@ -115,10 +115,10 @@ export function TransactionsTable() {
                   {transaction.ui.label}
                 </Badge>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-center">
                 {transaction.quantity}
               </TableCell>
-              <TableCell className="text-right font-mono">
+              <TableCell className="text-right">
                 {transaction.formattedPrice}
               </TableCell>
               <TableCell className="max-w-[200px] truncate text-muted-foreground">
