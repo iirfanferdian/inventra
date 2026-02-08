@@ -8,8 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { LoaderCircle, TrendingDown, TrendingUp } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { format } from "date-fns";
@@ -30,35 +30,43 @@ const TYPE_CONFIG = {
 
 export function TransactionsTable() {
   const searchParams = useSearchParams();
+  const type = searchParams.get("type") || "all";
 
-  const type = searchParams.get("type") || undefined;
-  const { data } = useQuery(TransactionQueryOptions.all(type));
-  console.log(data);
+  // Karena kita sudah mengirim 'type' ke useQuery, filtering biasanya sudah dilakukan di sisi server
+  const { data, isLoading } = useQuery(
+    TransactionQueryOptions.all(type === "all" ? undefined : type),
+  );
+
   const validateData = useMemo(() => {
     if (!data?.data) return [];
 
-    // Change the date format
-    const formattedData = data.data.map((transaction) => ({
-      ...transaction,
-      type: TYPE_CONFIG[transaction.type],
-      createdAt: format(new Date(transaction.createdAt), "dd MMM yyyy"),
-      formattedPrice: new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        maximumFractionDigits: 0,
-      }).format(Number(transaction.priceAtTransaction)),
-    }));
+    return data.data.map((transaction: any) => {
+      // Pastikan config tersedia agar tidak error saat akses .color atau .label
+      const config =
+        TYPE_CONFIG[transaction.type as keyof typeof TYPE_CONFIG] ||
+        TYPE_CONFIG.IN;
 
-    let filtered = formattedData;
+      return {
+        ...transaction,
+        ui: config, // Simpan ke properti 'ui' supaya tidak menimpa string asli 'type'
+        formattedDate: format(new Date(transaction.createdAt), "dd MMM yyyy"),
+        formattedPrice: new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }).format(Number(transaction.priceAtTransaction)),
+      };
+    });
+  }, [data]);
 
-    if (type) {
-      filtered = formattedData.filter(
-        (transaction) => transaction.type.key === type,
-      );
-    }
-
-    return filtered;
-  }, [data, type]);
+  if (isLoading) {
+    return (
+      <div className="flex h-32 w-full items-center justify-center">
+        <LoaderCircle className="mr-2 animate-spin text-primary" />
+        <p className="text-muted-foreground">Loading transactions...</p>
+      </div>
+    );
+  }
 
   return (
     <Table className="rounded-lg bg-background">
@@ -67,35 +75,58 @@ export function TransactionsTable() {
           <TableHead>Date</TableHead>
           <TableHead>Item</TableHead>
           <TableHead>Type</TableHead>
-          <TableHead>Quantity</TableHead>
-          <TableHead>Amount</TableHead>
+          <TableHead className="text-right">Quantity</TableHead>
+          <TableHead className="text-right">Amount</TableHead>
           <TableHead>Notes</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {validateData.map((transaction) => (
-          <TableRow key={transaction.id}>
-            <TableCell className=" text-muted-foreground flex gap-2">
-              {transaction.createdAt}
-            </TableCell>
-            <TableCell>{transaction?.item?.name}</TableCell>
-            <TableCell>
-              <Badge variant="outline" className={transaction.type.color}>
-                {transaction.type.label === "Stock In" ? (
-                  <TrendingUp />
-                ) : (
-                  <TrendingDown />
-                )}
-                {transaction.type.label}
-              </Badge>
-            </TableCell>
-            <TableCell>{transaction.quantity}</TableCell>
-            <TableCell>{transaction.formattedPrice}</TableCell>
-            <TableCell className="text-muted-foreground">
-              {transaction.note}
+        {validateData.length === 0 ? (
+          <TableRow>
+            <TableCell
+              colSpan={6}
+              className="h-32 text-center text-muted-foreground"
+            >
+              {type !== "all"
+                ? `No transactions for "${type}" found.`
+                : "No transactions found."}
             </TableCell>
           </TableRow>
-        ))}
+        ) : (
+          /* PERBAIKAN: Hapus kurung kurawal ekstra dan gunakan map langsung */
+          validateData.map((transaction) => (
+            <TableRow key={transaction.id}>
+              <TableCell className="text-muted-foreground">
+                {transaction.formattedDate}
+              </TableCell>
+              <TableCell className="font-medium">
+                {transaction?.item?.name || "Deleted Item"}
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={`flex w-fit items-center gap-1 ${transaction.ui.color}`}
+                >
+                  {transaction.type === "IN" ? (
+                    <TrendingUp size={14} />
+                  ) : (
+                    <TrendingDown size={14} />
+                  )}
+                  {transaction.ui.label}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                {transaction.quantity}
+              </TableCell>
+              <TableCell className="text-right font-mono">
+                {transaction.formattedPrice}
+              </TableCell>
+              <TableCell className="max-w-[200px] truncate text-muted-foreground">
+                {transaction.note || "-"}
+              </TableCell>
+            </TableRow>
+          ))
+        )}
       </TableBody>
     </Table>
   );
