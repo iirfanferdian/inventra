@@ -3,11 +3,11 @@ import { calculatedTransaction } from "@/app/actions/transactions";
 import { ItemQueryOptions } from "@/hooks/queries/use-items";
 import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, LoaderCircle } from "lucide-react";
 import React, { useMemo, useState } from "react";
 
 const TransactionCards = () => {
-  const { data } = useQuery(TransactionQueryOptions.all());
+  const { data, isPending } = useQuery(TransactionQueryOptions.all());
 
   const formattedData = useMemo(() => {
     // Check data
@@ -39,7 +39,11 @@ const TransactionCards = () => {
         <div>
           <p className="text-muted-foreground">Total Stock In</p>
           <h1 className="text-2xl font-bold text-green-600/80">
-            {`Rp ${formattedData?.stockIn}`}
+            {isPending ? (
+              <LoaderCircle className="animate-spin" size={20} />
+            ) : (
+              `Rp ${formattedData?.stockIn}`
+            )}
           </h1>
         </div>
         <ArrowDownRight
@@ -53,8 +57,11 @@ const TransactionCards = () => {
         <div>
           <p className="text-muted-foreground">Total Stock Out</p>
           <h1 className="text-2xl font-bold text-red-600/80">
-            {" "}
-            {`Rp ${formattedData?.stockOut}`}
+            {isPending ? (
+              <LoaderCircle className="animate-spin" size={20} />
+            ) : (
+              `Rp ${formattedData?.stockOut}`
+            )}
           </h1>
         </div>
         <ArrowUpRight
@@ -66,7 +73,14 @@ const TransactionCards = () => {
       {/* 3 */}
       <div className="flex flex-col justify-center border border-muted-background h-auto my-8 p-6 bg-background rounded-lg hover:shadow-lg transition-shadow">
         <p className="text-muted-foreground">Net Movement</p>
-        <h1 className="text-2xl font-bold"> {`Rp ${formattedData?.net}`}</h1>
+        <h1 className="text-2xl font-bold">
+          {" "}
+          {isPending ? (
+            <LoaderCircle className="animate-spin" size={20} />
+          ) : (
+            `Rp ${formattedData?.net}`
+          )}
+        </h1>
       </div>
     </section>
   );

@@ -8,35 +8,55 @@ export const addNewItem = async (req: any) => {
   const { item, sku, stock, minStock, price, category, description } = req;
 
   try {
-    await prisma.item.create({
-      data: {
-        name: item,
-        sku,
-        currentStock: stock,
-        minStock: minStock || 0,
-        price,
-        description,
-        user: {
-          connect: { id: session?.user?.id },
-        },
-        ...(category && {
-          category: {
-            connectOrCreate: {
-              where: {
-                name_userId: {
-                  name: category,
-                  userId: session?.user?.id,
+    const result = await prisma.$transaction(
+      async (tx) => {
+        //Create Item
+        const itemCreated = await tx.item.create({
+          data: {
+            name: item,
+            sku,
+            currentStock: stock,
+            minStock: minStock || 0,
+            price,
+            description,
+            user: {
+              connect: { id: session?.user?.id },
+            },
+            ...(category && {
+              category: {
+                connectOrCreate: {
+                  where: {
+                    name_userId: {
+                      name: category,
+                      userId: session?.user?.id,
+                    },
+                  },
+                  create: {
+                    name: category,
+                    userId: session?.user?.id,
+                  },
                 },
               },
-              create: {
-                name: category,
-                userId: session?.user?.id,
-              },
-            },
+            }),
           },
-        }),
+        });
+
+        //Create Transaction too while adding the item to the storage
+        const createTransaction = await tx.transaction.create({
+          data: {
+            itemId: itemCreated.id,
+            priceAtTransaction: price,
+            type: "IN",
+            note: "Add New Item",
+            quantity: itemCreated.currentStock,
+            userId: session?.user?.id as string,
+            createdAt: new Date(),
+          },
+        });
       },
-    });
+      { maxWait: 5000, timeout: 10000 },
+    );
+
     return { success: true, message: "Item Created Successfully" };
   } catch (e) {
     // Error yang berasal dari database (misal: constraint violation)
@@ -46,6 +66,7 @@ export const addNewItem = async (req: any) => {
         message: `This item with spesific SKU already created`,
       };
     }
+    console.log(e);
     return {
       success: false,
       message: "Unknown System Error",

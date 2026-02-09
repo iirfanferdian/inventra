@@ -59,6 +59,7 @@ export function ItemsTable() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["items"] }),
         queryClient.invalidateQueries({ queryKey: ["category"] }),
+        queryClient.invalidateQueries({ queryKey: ["transactions"] }),
       ]);
     },
   });
@@ -77,7 +78,7 @@ export function ItemsTable() {
       // Check current stock to set the statusKey
       if (item.currentStock <= 0) {
         statusKey = "outStock";
-      } else if (item.currentStock <= effectiveMinStock) {
+      } else if (item.currentStock < effectiveMinStock) {
         statusKey = "lowStock";
       }
 
