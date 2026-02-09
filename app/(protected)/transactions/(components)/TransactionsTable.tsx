@@ -9,7 +9,14 @@ import {
 } from "@/components/ui/table";
 import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
 import { useQuery } from "@tanstack/react-query";
-import { LoaderCircle, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowDownUp,
+  ArrowUpRight,
+  LoaderCircle,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { format } from "date-fns";
@@ -32,7 +39,6 @@ export function TransactionsTable() {
   const searchParams = useSearchParams();
   const type = searchParams.get("type") || "all";
 
-  // Karena kita sudah mengirim 'type' ke useQuery, filtering biasanya sudah dilakukan di sisi server
   const { data, isLoading } = useQuery(
     TransactionQueryOptions.all(type === "all" ? undefined : type),
   );
@@ -41,14 +47,13 @@ export function TransactionsTable() {
     if (!data?.data) return [];
 
     return data.data.map((transaction: any) => {
-      // Pastikan config tersedia agar tidak error saat akses .color atau .label
       const config =
         TYPE_CONFIG[transaction.type as keyof typeof TYPE_CONFIG] ||
         TYPE_CONFIG.IN;
 
       return {
         ...transaction,
-        ui: config, // Simpan ke properti 'ui' supaya tidak menimpa string asli 'type'
+        ui: config,
         formattedDate: format(new Date(transaction.createdAt), "dd MMM yyyy"),
         formattedPrice: new Intl.NumberFormat("id-ID", {
           style: "currency",
@@ -108,9 +113,9 @@ export function TransactionsTable() {
                   className={`flex w-fit items-center gap-1 ${transaction.ui.color}`}
                 >
                   {transaction.type === "IN" ? (
-                    <TrendingUp size={14} />
+                    <ArrowDownRight size={14} />
                   ) : (
-                    <TrendingDown size={14} />
+                    <ArrowUpRight size={14} />
                   )}
                   {transaction.ui.label}
                 </Badge>

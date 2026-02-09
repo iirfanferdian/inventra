@@ -1,12 +1,37 @@
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
-import React from "react";
+"use client";
+import { calculatedTransaction } from "@/app/actions/transactions";
+import { ItemQueryOptions } from "@/hooks/queries/use-items";
+import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import React, { useMemo, useState } from "react";
 
 const TransactionCards = () => {
+  const { data } = useQuery(TransactionQueryOptions.all());
+
+  const formattedData = useMemo(() => {
+    // Check data
+    if (!data) return;
+
+    let stockIn = 0;
+    let stockOut = 0;
+    let net = 0;
+
+    //Calculate Function
+    const calculateData = data?.data?.map((transaction) => {
+      if (transaction?.type === "IN") {
+        stockIn += transaction.quantity * transaction.priceAtTransaction;
+      }
+      if (transaction?.type === "OUT") {
+        stockOut += transaction.quantity * transaction.priceAtTransaction;
+      }
+
+      net = stockIn + -stockOut;
+    });
+
+    return { stockIn, stockOut, net };
+  }, [data]);
+
   return (
     <section className="w-full grid grid-cols-3 gap-4">
       {/* 1 */}
@@ -14,7 +39,7 @@ const TransactionCards = () => {
         <div>
           <p className="text-muted-foreground">Total Stock In</p>
           <h1 className="text-2xl font-bold text-green-600/80">
-            Rp 487.650.000
+            {`Rp ${formattedData?.stockIn}`}
           </h1>
         </div>
         <ArrowDownRight
@@ -26,8 +51,11 @@ const TransactionCards = () => {
       {/* 2 */}
       <div className="flex justify-between items-center border border-muted-background h-auto my-8 p-6 bg-background rounded-lg hover:shadow-lg transition-shadow">
         <div>
-          <p className="text-muted-foreground">Total Inventory Value</p>
-          <h1 className="text-2xl font-bold text-red-600/80">Rp 487.650.000</h1>
+          <p className="text-muted-foreground">Total Stock Out</p>
+          <h1 className="text-2xl font-bold text-red-600/80">
+            {" "}
+            {`Rp ${formattedData?.stockOut}`}
+          </h1>
         </div>
         <ArrowUpRight
           size={50}
@@ -38,7 +66,7 @@ const TransactionCards = () => {
       {/* 3 */}
       <div className="flex flex-col justify-center border border-muted-background h-auto my-8 p-6 bg-background rounded-lg hover:shadow-lg transition-shadow">
         <p className="text-muted-foreground">Net Movement</p>
-        <h1 className="text-2xl font-bold">Rp 487.650.000</h1>
+        <h1 className="text-2xl font-bold"> {`Rp ${formattedData?.net}`}</h1>
       </div>
     </section>
   );
