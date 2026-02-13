@@ -1,10 +1,8 @@
 "use client";
-import { calculatedTransaction } from "@/app/actions/transactions";
-import { ItemQueryOptions } from "@/hooks/queries/use-items";
 import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, LoaderCircle } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 
 const TransactionCards = () => {
   const { data, isPending } = useQuery(TransactionQueryOptions.all());

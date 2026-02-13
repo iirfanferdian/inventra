@@ -208,7 +208,7 @@ export function AddNewTransactionButton() {
                 )}
               </Field>
               <Field>
-                <Label htmlFor="price">Price</Label>
+                <Label htmlFor="price">Price/unit</Label>
                 <Input
                   id="price"
                   type="number"

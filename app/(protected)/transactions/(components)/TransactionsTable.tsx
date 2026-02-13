@@ -9,14 +9,7 @@ import {
 } from "@/components/ui/table";
 import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowDownRight,
-  ArrowDownUp,
-  ArrowUpRight,
-  LoaderCircle,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, LoaderCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { format } from "date-fns";
@@ -59,7 +52,9 @@ export function TransactionsTable() {
           style: "currency",
           currency: "IDR",
           maximumFractionDigits: 0,
-        }).format(Number(transaction.priceAtTransaction)),
+        }).format(
+          Number(transaction.priceAtTransaction * transaction.quantity),
+        ),
       };
     });
   }, [data]);
@@ -81,7 +76,7 @@ export function TransactionsTable() {
           <TableHead>Item</TableHead>
           <TableHead>Type</TableHead>
           <TableHead className="text-center">Quantity</TableHead>
-          <TableHead className="w-[200px] text-right">Amount</TableHead>
+          <TableHead className="w-[200px] text-right">Total Amount</TableHead>
           <TableHead>Notes</TableHead>
         </TableRow>
       </TableHeader>
