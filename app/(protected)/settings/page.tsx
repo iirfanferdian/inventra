@@ -1,8 +1,6 @@
 import { SidebarCollapseButton } from "@/components/ui/SidebarCollapseButton";
 import SelectionButtons from "./(components)/SelectionButtons";
-import General from "./(components)/General";
-import Notifications from "./(components)/Notifications";
-import Security from "./(components)/Security";
+import Section from "./(components)/Section";
 
 const page = async () => {
   return (
@@ -16,11 +14,7 @@ const page = async () => {
 
       <SelectionButtons />
 
-      {/* <General /> */}
-
-      {/* <Notifications /> */}
-
-      <Security />
+      <Section />
       <div className="bottom-10 absolute md:hidden lg:hidden">
         <SidebarCollapseButton mode="mobile" />
       </div>

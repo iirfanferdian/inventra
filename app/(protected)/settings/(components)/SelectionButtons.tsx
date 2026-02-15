@@ -1,13 +1,31 @@
+"use client";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const SelectionButtons = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const section = searchParams.get("section") || "general";
+
+  const handleSectionChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "general") {
+      params.delete("section");
+    } else {
+      params.set("section", value);
+    }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   return (
     <ToggleGroup
       className="bg-primary-background text-muted-foreground mt-8"
       variant="outline"
       type="single"
       defaultValue="general"
-      //   onValueChange
+      value={section}
+      onValueChange={handleSectionChange}
       spacing={2}
     >
       <ToggleGroupItem
