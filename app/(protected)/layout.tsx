@@ -19,8 +19,8 @@ const InventraLayout = async ({ children }: { children: React.ReactNode }) => {
       <main className="bg-primary/5 w-full min-h-screen">
         <SessionProvider session={session}>
           <InventraHeader />
+          {children}
         </SessionProvider>
-        {children}
       </main>
     </SidebarProvider>
   );
