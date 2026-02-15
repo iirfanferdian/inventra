@@ -65,6 +65,7 @@ model User {
   role          String @default("user")
   accounts      Account[]
   sessions      Session[]
+  currency      String    @default("IDR")
  
   @@map("users")
   // Relasi
