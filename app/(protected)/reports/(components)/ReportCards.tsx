@@ -1,6 +1,6 @@
 "use client";
 import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
-import { formattedPrice } from "@/utils/formatPrice";
+import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, Package, TrendingDown } from "lucide-react";
 import { useMemo } from "react";
@@ -8,6 +8,7 @@ import { useMemo } from "react";
 const ReportCards = () => {
   const { data, isLoading } = useQuery(TransactionQueryOptions.all());
 
+  const currency = useCurrencyStore((state) => state.currency);
   const validateData = useMemo(() => {
     if (!data?.data)
       return {
@@ -35,12 +36,12 @@ const ReportCards = () => {
     // const inventoryValue = totalExpenses;
 
     return {
-      totalRevenue: formattedPrice(totalRevenue),
-      totalExpenses: formattedPrice(totalExpenses),
-      net: formattedPrice(net),
+      totalRevenue: formattedPrice(totalRevenue, currency),
+      totalExpenses: formattedPrice(totalExpenses, currency),
+      net: formattedPrice(net, currency),
       // inventoryValue: formattedPrice(inventoryValue),
     };
-  }, [data]);
+  }, [data, currency]);
 
   return (
     <section className="w-full grid grid-cols-3 gap-4">

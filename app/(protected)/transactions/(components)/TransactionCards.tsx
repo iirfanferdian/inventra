@@ -1,11 +1,14 @@
 "use client";
 import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
+import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, LoaderCircle } from "lucide-react";
 import React, { useMemo } from "react";
 
 const TransactionCards = () => {
   const { data, isPending } = useQuery(TransactionQueryOptions.all());
+
+  const currency = useCurrencyStore((state) => state.currency);
 
   const formattedData = useMemo(() => {
     // Check data
@@ -27,8 +30,12 @@ const TransactionCards = () => {
       net = stockIn + -stockOut;
     });
 
-    return { stockIn, stockOut, net };
-  }, [data]);
+    return {
+      stockIn: formattedPrice(stockIn, currency),
+      stockOut: formattedPrice(stockOut, currency),
+      net: formattedPrice(net, currency),
+    };
+  }, [data, currency]);
 
   return (
     <section className="w-full grid grid-cols-3 gap-4">
@@ -40,7 +47,7 @@ const TransactionCards = () => {
             {isPending ? (
               <LoaderCircle className="animate-spin" size={20} />
             ) : (
-              `Rp ${formattedData?.stockIn}`
+              `${formattedData?.stockIn}`
             )}
           </h1>
         </div>
@@ -58,7 +65,7 @@ const TransactionCards = () => {
             {isPending ? (
               <LoaderCircle className="animate-spin" size={20} />
             ) : (
-              `Rp ${formattedData?.stockOut}`
+              `${formattedData?.stockOut}`
             )}
           </h1>
         </div>
@@ -76,7 +83,7 @@ const TransactionCards = () => {
           {isPending ? (
             <LoaderCircle className="animate-spin" size={20} />
           ) : (
-            `Rp ${formattedData?.net}`
+            `${formattedData?.net}`
           )}
         </h1>
       </div>

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import AlertWindow from "./AlertWindow";
+import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
 
 // 1. Konfigurasi Status (Single Source of Truth)
 const STATUS_CONFIG = {
@@ -64,6 +65,8 @@ export function ItemsTable() {
     },
   });
 
+  const currency = useCurrencyStore((state) => state.currency);
+
   // Data for render usage (Processing Data for min stock and currency) IMPORTANT BEFORE RENDER for efficiency
   const processedItems = useMemo(() => {
     if (!data) return [];
@@ -92,11 +95,7 @@ export function ItemsTable() {
         statusKey,
         status: STATUS_CONFIG[statusKey],
         progressValue,
-        formattedPrice: new Intl.NumberFormat("id-ID", {
-          style: "currency",
-          currency: "IDR",
-          maximumFractionDigits: 0,
-        }).format(Number(item.price)),
+        formattedPrice: formattedPrice(item.price, currency),
       };
     });
     //Set filtered to clean data without filter
@@ -118,7 +117,7 @@ export function ItemsTable() {
 
     //Return the result filtered
     return filtered;
-  }, [data, statusFilter, searchValue]);
+  }, [data, statusFilter, searchValue, currency]);
 
   // Loader if query of getting items is pending
   if (queryPending) {

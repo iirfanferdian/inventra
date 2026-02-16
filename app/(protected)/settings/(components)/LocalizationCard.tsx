@@ -8,9 +8,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCurrencyStore } from "@/utils/formatPrice";
 import { Globe } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const LocalizationCard = () => {
+  const { data, status } = useSession();
+
+  const currency = useCurrencyStore((state) => state.currency);
+  const setCurrency = useCurrencyStore((state) => state.setCurrency);
+
+  const currencyHandler = (value) => {
+    setCurrency(value);
+  };
+
   return (
     <div className="w-full flex flex-col gap-8 bg-background rounded-lg hover:shadow-lg transition-shadow my-8 p-6">
       <div>
@@ -26,9 +37,9 @@ const LocalizationCard = () => {
         {/* Currency */}
         <Field>
           <Label>Currency</Label>
-          <Select>
+          <Select defaultValue={currency} onValueChange={currencyHandler}>
             <SelectTrigger>
-              <SelectValue defaultValue="IDR" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -43,16 +54,13 @@ const LocalizationCard = () => {
         {/* Timezone */}
         <Field>
           <Label>Language</Label>
-          <Select>
+          <Select defaultValue="English">
             <SelectTrigger>
-              <SelectValue defaultValue="IDR" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="IDR">IDR</SelectItem>
-                <SelectItem value="USD">USD</SelectItem>
-                <SelectItem value="EUR">EUR</SelectItem>
-                <SelectItem value="JPY">JPY</SelectItem>
+                <SelectItem value="English">English</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>

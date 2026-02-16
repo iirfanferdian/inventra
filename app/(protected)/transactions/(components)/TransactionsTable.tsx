@@ -14,6 +14,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
 
 const TYPE_CONFIG = {
   IN: {
@@ -36,6 +37,7 @@ export function TransactionsTable() {
     TransactionQueryOptions.all(type === "all" ? undefined : type),
   );
 
+  const currency = useCurrencyStore((state) => state.currency);
   const validateData = useMemo(() => {
     if (!data?.data) return [];
 
@@ -44,20 +46,15 @@ export function TransactionsTable() {
         TYPE_CONFIG[transaction.type as keyof typeof TYPE_CONFIG] ||
         TYPE_CONFIG.IN;
 
+      const totalPrice = transaction.priceAtTransaction * transaction.quantity;
       return {
         ...transaction,
         ui: config,
         formattedDate: format(new Date(transaction.createdAt), "dd MMM yyyy"),
-        formattedPrice: new Intl.NumberFormat("id-ID", {
-          style: "currency",
-          currency: "IDR",
-          maximumFractionDigits: 0,
-        }).format(
-          Number(transaction.priceAtTransaction * transaction.quantity),
-        ),
+        formattedPrice: formattedPrice(totalPrice, currency),
       };
     });
-  }, [data]);
+  }, [data, currency]);
 
   if (isLoading) {
     return (
