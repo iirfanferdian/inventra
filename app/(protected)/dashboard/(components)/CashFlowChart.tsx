@@ -25,16 +25,6 @@ import { useMemo } from "react";
 import { getLast6Months } from "@/utils/getLast6Months";
 import { formatMonth } from "@/utils/formatMonth";
 
-// Contoh Data Cashflow (Inflow vs Outflow)
-const chartData = [
-  { month: "January", inflow: 186, outflow: 80 },
-  { month: "February", inflow: 305, outflow: 200 },
-  { month: "March", inflow: 237, outflow: 120 },
-  { month: "April", inflow: 73, outflow: 190 }, // Kasus Loss (Outflow > Inflow)
-  { month: "May", inflow: 209, outflow: 130 },
-  { month: "June", inflow: 214, outflow: 140 },
-];
-
 const chartConfig = {
   inflow: {
     label: "Income",
@@ -66,8 +56,9 @@ export function CashFlowChart() {
     }
 
     const result = lastSixMonths.map((period) => {
-      const res = formatMonth([period.month])[0];
-      const monthString = res.month;
+      const monthString = new Intl.DateTimeFormat("en-US", {
+        month: "short",
+      }).format(new Date(period.year, period.month));
 
       const totals = data.data.reduce(
         (acc, tx) => {
