@@ -17,6 +17,11 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useQuery } from "@tanstack/react-query";
+import { getLast6Months } from "@/utils/getLast6Months";
+import { formatMonth } from "@/utils/formatMonth";
+import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
+import { useMemo } from "react";
 
 export const description = "A multiple bar chart with Y-Axis label";
 
@@ -30,17 +35,66 @@ const chartData = [
 ];
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  inflow: {
+    label: "Income",
     color: "hsl(var(--chart-inflow))",
   },
-  mobile: {
-    label: "Mobile",
+  outflow: {
+    label: "Expense",
     color: "hsl(var(--chart-outflow))",
   },
 } satisfies ChartConfig;
 
 export function ReportBarChart() {
+  const { data, isPending } = useQuery(TransactionQueryOptions.all());
+
+  const formattedData = useMemo(() => {
+    const lastSixMonths = getLast6Months();
+
+    if (!data?.data) {
+      return lastSixMonths
+        .map((period) => {
+          const res = formatMonth([period.month])[0];
+          return {
+            month: res.month,
+            inflow: 0,
+            outflow: 0,
+          };
+        })
+        .reverse();
+    }
+
+    const result = lastSixMonths.map((period) => {
+      const monthString = new Intl.DateTimeFormat("en-US", {
+        month: "short",
+      }).format(new Date(period.year, period.month));
+
+      const totals = data.data.reduce(
+        (acc, tx) => {
+          const txDate = new Date(tx.createdAt);
+          if (
+            txDate.getMonth() === period.month &&
+            txDate.getFullYear() === period.year
+          ) {
+            const amount = tx.priceAtTransaction * tx.quantity;
+            if (tx.type === "IN") acc.outflow += amount;
+            if (tx.type === "OUT") acc.inflow += amount;
+          }
+          return acc;
+        },
+        { inflow: 0, outflow: 0 },
+      );
+
+      return {
+        month: monthString,
+        inflow: totals.inflow,
+        outflow: totals.outflow,
+      };
+    });
+
+    return result.reverse();
+  }, [data]);
+
   return (
     <Card>
       <CardHeader>
@@ -52,7 +106,7 @@ export function ReportBarChart() {
           {/* Menambahkan margin left agar Label YAxis tidak terpotong */}
           <BarChart
             accessibilityLayer
-            data={chartData}
+            data={formattedData}
             margin={{ left: 12, right: 12 }}
           >
             <CartesianGrid vertical={false} />
@@ -71,7 +125,13 @@ export function ReportBarChart() {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              width={40}
+              width={60}
+              tickFormatter={(value) =>
+                new Intl.NumberFormat("en-US", {
+                  notation: "compact",
+                  compactDisplay: "short",
+                }).format(value)
+              }
             />
 
             <ChartTooltip
@@ -79,14 +139,14 @@ export function ReportBarChart() {
               content={<ChartTooltipContent indicator="dashed" />}
             />
             <Bar
-              dataKey="desktop"
-              fill="var(--color-desktop)"
+              dataKey="inflow"
+              fill="var(--color-inflow)"
               radius={[0, 0, 4, 4]}
               activeBar={{ fillOpacity: 0.8 }}
             />
             <Bar
-              dataKey="mobile"
-              fill="var(--color-mobile)"
+              dataKey="outflow"
+              fill="var(--color-outflow)"
               radius={[4, 4, 0, 0]}
               activeBar={{ fillOpacity: 0.8 }}
             />
