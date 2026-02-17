@@ -1,87 +1,132 @@
+"use client";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowDownRight, ArrowUpRight, LoaderCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
 
-const invoices = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
+const TYPE_CONFIG = {
+  IN: {
+    key: "IN",
+    label: "Stock In",
+    color: "text-green-400 bg-green-500/10 dark:bg-green-500/30",
   },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
+  OUT: {
+    key: "OUT",
+    label: "Stock Out",
+    color: "text-red-400 bg-red-500/10 dark:bg-red-500/30",
   },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-];
+};
 
 export function TransactionsTable() {
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type") || "all";
+
+  const { data, isLoading } = useQuery(
+    TransactionQueryOptions.all(type === "all" ? undefined : type),
+  );
+
+  const currency = useCurrencyStore((state) => state.currency);
+  const validateData = useMemo(() => {
+    if (!data?.data) return [];
+
+    return data.data
+      .map((transaction: any) => {
+        const config =
+          TYPE_CONFIG[transaction.type as keyof typeof TYPE_CONFIG] ||
+          TYPE_CONFIG.IN;
+
+        const totalPrice =
+          transaction.priceAtTransaction * transaction.quantity;
+        return {
+          ...transaction,
+          ui: config,
+          formattedDate: format(new Date(transaction.createdAt), "dd MMM yyyy"),
+          formattedPrice: formattedPrice(totalPrice, currency),
+        };
+      })
+      .slice(0, 5);
+  }, [data, currency]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-32 w-full items-center justify-center">
+        <LoaderCircle className="mr-2 animate-spin text-primary" />
+        <p className="text-muted-foreground">Loading transactions...</p>
+      </div>
+    );
+  }
+
   return (
-    <Table>
-      <TableCaption>A list of your recent invoices.</TableCaption>
+    <Table className="rounded-lg bg-background">
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[100px]">Invoice</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Method</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Item</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead className="text-center">Quantity</TableHead>
+          <TableHead className="w-[200px] text-right">Total Amount</TableHead>
+          <TableHead>Notes</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {invoices.map((invoice) => (
-          <TableRow key={invoice.invoice}>
-            <TableCell className="font-medium">{invoice.invoice}</TableCell>
-            <TableCell>{invoice.paymentStatus}</TableCell>
-            <TableCell>{invoice.paymentMethod}</TableCell>
-            <TableCell className="text-right">{invoice.totalAmount}</TableCell>
+        {validateData.length === 0 ? (
+          <TableRow>
+            <TableCell
+              colSpan={6}
+              className="h-32 text-center text-muted-foreground"
+            >
+              {type !== "all"
+                ? `No transactions for "${type}" found.`
+                : "No transactions found."}
+            </TableCell>
           </TableRow>
-        ))}
+        ) : (
+          validateData.map((transaction) => (
+            <TableRow key={transaction.id}>
+              <TableCell className="text-muted-foreground">
+                {transaction.formattedDate}
+              </TableCell>
+              <TableCell className="font-medium">
+                {transaction?.item?.name || "Deleted Item"}
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={`flex w-fit items-center gap-1 ${transaction.ui.color}`}
+                >
+                  {transaction.type === "IN" ? (
+                    <ArrowDownRight size={14} />
+                  ) : (
+                    <ArrowUpRight size={14} />
+                  )}
+                  {transaction.ui.label}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-center">
+                {transaction.quantity}
+              </TableCell>
+              <TableCell className="text-right">
+                {transaction.formattedPrice}
+              </TableCell>
+              <TableCell className="max-w-[200px] truncate text-muted-foreground">
+                {transaction.note || "-"}
+              </TableCell>
+            </TableRow>
+          ))
+        )}
       </TableBody>
-      <TableFooter>
-        <TableRow>
-          <TableCell colSpan={3}>Total</TableCell>
-          <TableCell className="text-right">$2,500.00</TableCell>
-        </TableRow>
-      </TableFooter>
     </Table>
   );
 }

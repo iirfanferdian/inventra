@@ -126,9 +126,9 @@ const OverviewCards = () => {
   ]);
 
   return (
-    <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-3 w-full justify-center">
+    <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-3 w-full h-auto justify-center">
       {/* 1 */}
-      <div className="flex flex-col gap-2 justify-center border border-muted-background h-auto my-8 p-3 bg-background rounded-lg hover:shadow-lg transition-shadow">
+      <div className="flex flex-col gap-2 justify-center border border-muted-background h-auto mt-8 p-3 bg-background rounded-lg hover:shadow-lg transition-shadow">
         <p className="text-muted-foreground">Total Inventory Value</p>
         <h1 className="text-2xl font-bold">{`${formattedData.inventoryValue}`}</h1>
         <p className="text-muted-foreground">
@@ -145,14 +145,14 @@ const OverviewCards = () => {
       </div>
 
       {/* 2 */}
-      <div className="flex flex-col gap-2 justify-center border border-muted-background h-auto my-8 p-3 bg-background rounded-lg hover:shadow-lg transition-shadow">
+      <div className="flex flex-col gap-2 justify-center border border-muted-background h-auto mt-8 p-3 bg-background rounded-lg hover:shadow-lg transition-shadow">
         <p className="text-muted-foreground">Low Stock Items</p>
         <h1 className="text-2xl font-bold">{`${formattedData.lowStock}`}</h1>
         <p className="text-muted-foreground">Items need restocking</p>
       </div>
 
       {/* 3 */}
-      <div className="flex flex-col gap-2 justify-center border border-muted-background h-auto my-8 p-3 bg-background rounded-lg hover:shadow-lg transition-shadow">
+      <div className="flex flex-col gap-2 justify-center border border-muted-background h-auto mt-8 p-3 bg-background rounded-lg hover:shadow-lg transition-shadow">
         <p className="text-muted-foreground">Monthly Transactions</p>
         <h1 className="text-2xl font-bold">{`${formattedData.monthlyTx}`}</h1>
         <p className="text-muted-foreground">
@@ -169,7 +169,7 @@ const OverviewCards = () => {
       </div>
 
       {/* 4 */}
-      <div className="flex flex-col gap-2 justify-center border border-muted-background h-auto my-8 p-3 bg-background rounded-lg hover:shadow-lg transition-shadow">
+      <div className="flex flex-col gap-2 justify-center border border-muted-background h-auto mt-8 p-3 bg-background rounded-lg hover:shadow-lg transition-shadow">
         <p className="text-muted-foreground">Total Products</p>
         <h1 className="text-2xl font-bold">{`${formattedData.totalProducts}`}</h1>
         <p className="text-muted-foreground">Active items in inventory</p>

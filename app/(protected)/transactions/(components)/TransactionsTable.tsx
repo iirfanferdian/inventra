@@ -90,7 +90,6 @@ export function TransactionsTable() {
             </TableCell>
           </TableRow>
         ) : (
-          /* PERBAIKAN: Hapus kurung kurawal ekstra dan gunakan map langsung */
           validateData.map((transaction) => (
             <TableRow key={transaction.id}>
               <TableCell className="text-muted-foreground">

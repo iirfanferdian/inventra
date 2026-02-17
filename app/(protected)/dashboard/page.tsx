@@ -16,11 +16,11 @@ const page = async () => {
       </header>
       <OverviewCards />
       <OverviewCharts />
-      <div className="flex p-4 flex-col w-full justify-center border border-muted-background bg-background rounded-lg hover:shadow-lg transition-shadow">
+      <div className="flex p-4 flex-col w-full h-auto justify-center border border-muted-background bg-background rounded-lg hover:shadow-lg transition-shadow">
         <header className="flex p-1 items-center justify-between">
           <h2 className="border-b-0 pb-0">Recent Transactions</h2>
           <Link
-            href={"/reports"}
+            href={"/transactions"}
             className="flex gap-2 text-primary hover:bg-muted-foreground/10 p-2 rounded-lg"
           >
             View All <ArrowRight className="" />
