@@ -41,6 +41,7 @@ const ProfileCard = () => {
             <input
               className="bg-primary/5 p-2 px-3 rounded-md  border border-muted-foreground  text-sm shadow-sm outline-none focus:ring-primary focus-visible:ring-2"
               type="text"
+              disabled
               placeholder="Tell us about yourself"
             />
           </div>
