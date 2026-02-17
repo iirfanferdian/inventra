@@ -20,50 +20,94 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-
-export const description = "A donut chart with text in the center";
-
-// 1. Data Dummy Stock (Ganti ini nanti dengan data dari database kamu)
-const chartData = [
-  { category: "electronics", stock: 275, fill: "var(--color-electronics)" },
-  { category: "clothing", stock: 200, fill: "var(--color-clothing)" },
-  { category: "furniture", stock: 187, fill: "var(--color-furniture)" },
-  { category: "groceries", stock: 173, fill: "var(--color-groceries)" },
-  { category: "others", stock: 90, fill: "var(--color-others)" },
-];
-
-// 2. Konfigurasi Label & Warna
-const chartConfig = {
-  stock: {
-    label: "Items",
-  },
-  electronics: {
-    label: "Electronics",
-    color: "hsl(var(--chart-1))",
-  },
-  clothing: {
-    label: "Clothing",
-    color: "hsl(var(--chart-2))",
-  },
-  furniture: {
-    label: "Furniture",
-    color: "hsl(var(--chart-3))",
-  },
-  groceries: {
-    label: "Groceries",
-    color: "hsl(var(--chart-4))",
-  },
-  others: {
-    label: "Others",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig;
+import { useQuery } from "@tanstack/react-query";
+import { ItemQueryOptions } from "@/hooks/queries/use-items";
 
 export function StockDistributionChart() {
-  // 3. Menghitung Total Stock secara otomatis untuk ditampilkan di tengah
-  const totalStock = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.stock, 0);
-  }, []);
+  const { data: items, isPending } = useQuery(ItemQueryOptions.all());
+
+  // Processed data
+  const processedData = React.useMemo(() => {
+    if (!items) return { chartData: [], totalStock: 0 };
+
+    // Grouping stock based on category
+    const categoryMap = items.reduce(
+      (acc, item) => {
+        const name = item.category?.name || "Uncategorized";
+        const stock = item.currentStock || 0;
+        acc[name] = (acc[name] || 0) + stock;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    // Sort and change to array
+    const sortedArray = Object.entries(categoryMap)
+      .map(([name, stock]) => ({ category: name, stock }))
+      .sort((a, b) => b.stock - a.stock);
+
+    const totalStockAll = sortedArray.reduce(
+      (acc, curr) => acc + curr.stock,
+      0,
+    );
+
+    //Conditional statement if there's 5 or less categories
+    if (sortedArray.length <= 5) {
+      return {
+        chartData: sortedArray.map((item) => ({
+          ...item,
+          fill: `var(--color-${item.category.replace(/\s+/g, "-")})`,
+        })),
+        totalStock: totalStockAll,
+      };
+    }
+
+    // Conditional statement if is more than 5 "Others"
+    const top4 = sortedArray.slice(0, 4);
+    const othersRaw = sortedArray.slice(4);
+    const othersTotal = othersRaw.reduce((acc, curr) => acc + curr.stock, 0);
+
+    const finalData = [
+      ...top4.map((item) => ({
+        ...item,
+        fill: `var(--color-${item.category.replace(/\s+/g, "-")})`,
+      })),
+      {
+        category: "Others",
+        stock: othersTotal,
+        fill: "var(--color-others)",
+      },
+    ];
+
+    return { chartData: finalData, totalStock: totalStockAll };
+  }, [items]);
+
+  const { chartData, totalStock } = processedData;
+
+  // Dynamic ChartConfig
+  const dynamicConfig = React.useMemo(() => {
+    const config: ChartConfig = {
+      stock: { label: "Items" },
+    };
+
+    chartData.forEach((item, index) => {
+      const key = item.category.replace(/\s+/g, "-");
+
+      if (item.category === "Others") {
+        config["others"] = {
+          label: "Others",
+          color: "hsl(var(--muted-foreground))",
+        };
+      } else {
+        config[key] = {
+          label: item.category,
+          color: `hsl(var(--chart-${(index % 4) + 1}))`,
+        };
+      }
+    });
+
+    return config;
+  }, [chartData]);
 
   return (
     <Card className="flex flex-col">
@@ -73,7 +117,7 @@ export function StockDistributionChart() {
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
-          config={chartConfig}
+          config={dynamicConfig}
           className="mx-auto aspect-square max-h-[250px]"
         >
           <PieChart>
@@ -85,12 +129,11 @@ export function StockDistributionChart() {
               data={chartData}
               dataKey="stock"
               nameKey="category"
-              innerRadius={60} // Membuat lubang tengah (Donut)
+              innerRadius={60}
               strokeWidth={5}
-              paddingAngle={2} // Memberi jarak putih antar irisan
-              cornerRadius={5} // Membuat sudut irisan membulat (Modern look)
+              paddingAngle={2}
+              cornerRadius={5}
             >
-              {/* 4. Label di Tengah Donut */}
               <Label
                 content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
@@ -121,8 +164,6 @@ export function StockDistributionChart() {
                 }}
               />
             </Pie>
-
-            {/* Legend dipindah ke bawah agar rapi */}
             <ChartLegend
               content={<ChartLegendContent nameKey="category" />}
               className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
@@ -132,11 +173,11 @@ export function StockDistributionChart() {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 leading-none font-medium">
-          Electronics dominate the stock (30%){" "}
+          {chartData[0]?.category} has the most stock{" "}
           <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total distribution for current warehouse
+          Showing distribution for {chartData.length} categories
         </div>
       </CardFooter>
     </Card>
