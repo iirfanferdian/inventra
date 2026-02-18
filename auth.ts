@@ -56,7 +56,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, trigger, session, user }) {
+      if (trigger === "update" && session?.user) {
+        // Pastikan nama propertinya sama!
+        if (session.user.name) token.name = session.user.name;
+        if (session.user.bio) token.bio = session.user.bio;
+      }
+
       // If 'user' exists, it means this is the initial login moment
       if (user) {
         token.id = user.id as string; // We save the DB id into the encrypted token
@@ -78,6 +84,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.currency = token.currency as string;
+        session.user.bio = token.bio as string;
       }
       return session;
     },
