@@ -6,9 +6,9 @@ const page = async () => {
 
   if (!session) {
     return redirect("/login");
+  } else {
+    return redirect("/dashboard");
   }
-
-  return <h1 className="">{JSON.stringify(session)}</h1>;
 };
 
 export default page;
