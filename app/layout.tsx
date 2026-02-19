@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import Providers from "@/providers/provider";
+import { Toaster } from "@/components/ui/sonner";
 
 // 1. Setup Font Utama (UI)
 const inter = Inter({
@@ -35,6 +36,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Providers>{children}</Providers>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

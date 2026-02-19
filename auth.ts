@@ -17,36 +17,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     Credentials({
       async authorize(credentials) {
-        console.log(credentials);
         const email = credentials?.email as string | undefined;
         const password = credentials?.password as string | undefined;
         try {
-          //Validation form
-          if (!email || !password) {
-            return null;
-          }
+          if (!email || !password) return null;
 
-          //Find user
           const user = await prisma.user.findUnique({
             where: { email: email },
           });
 
-          if (!user) {
-            return null;
-          }
+          if (!user || !user.password) return null;
 
-          //Check password is valid
           const passwordValid = await compare(password, user.password);
-
-          if (!passwordValid) {
-            return null;
-          }
+          if (!passwordValid) return null;
 
           return {
             id: user.id,
             name: user.name,
             email: user.email,
             currency: user.currency,
+            image: user.image, // Pastikan image dikembalikan saat login
           };
         } catch (error) {
           console.log(error);
@@ -56,28 +46,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      // If 'user' exists, it means this is the initial login moment
-      if (user) {
-        token.id = user.id as string; // We save the DB id into the encrypted token
-        token.currency = user.currency as string;
+    async jwt({ token, trigger, session, user }) {
+      // 1. LOGIKA SAAT UPDATE (Triggered by update() from client)
+      if (trigger === "update" && session?.user) {
+        if (session.user.name) token.name = session.user.name;
+        if (session.user.bio) token.bio = session.user.bio;
+        if (session.user.image) token.picture = session.user.image; // TAMBAHKAN INI (NextAuth pakai 'picture' di token default)
+        if (session.user.currency) token.currency = session.user.currency;
+      }
 
+      // 2. LOGIKA SAAT INITIAL LOGIN
+      if (user) {
+        token.id = user.id as string;
+        token.currency = user.currency as string;
+        token.picture = user.image as string; // TAMBAHKAN INI
+
+        // Opsional: Jika butuh data terbaru dari DB saat login
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email as string },
-          select: { id: true, currency: true },
+          select: { id: true, currency: true, image: true, bio: true },
         });
+
         if (dbUser) {
           token.id = dbUser.id;
           token.currency = dbUser.currency;
+          token.picture = dbUser.image; // TAMBAHKAN INI
+          token.bio = dbUser.bio;
         }
       }
 
-      return token; // The token is now saved in the user's browser cookie
+      return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.currency = token.currency as string;
+        session.user.bio = token.bio as string;
+        session.user.image = token.picture as string; // TAMBAHKAN INI (Mapping dari token.picture ke session.user.image)
       }
       return session;
     },

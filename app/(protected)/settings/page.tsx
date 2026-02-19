@@ -8,7 +8,7 @@ const page = async () => {
       <header className="flex flex-col">
         <h1>Settings</h1>
         <p className="text-muted-foreground">
-          Analyze your business performance and trends
+          Manage your account and application preferences
         </p>
       </header>
 

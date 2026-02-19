@@ -66,6 +66,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   currency      String    @default("IDR")
+  bio           String    @default("")
  
   @@map("users")
   // Relasi
