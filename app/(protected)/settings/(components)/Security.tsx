@@ -18,13 +18,16 @@ const Security = () => {
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center bg-muted-foreground/10 p-4 rounded-lg">
           <div className="flex flex-col justify-center">
-            <h2 className="border-b-0 pb-0 text-sm">Change Password</h2>
+            <h2 className="border-b-0 pb-0 text-sm">Verify Email</h2>
             <p className="text-muted-foreground text-sm">
-              Ensure your account uses a strong, unique password.
+              Verify your email for safety.
             </p>
           </div>
-          <Button className="bg-muted-foregroud/10 border border-foreground text-foreground hover:bg-muted-foreground/10">
-            Update
+          <Button
+            disabled
+            className="bg-muted-foregroud/10 border border-foreground text-foreground hover:bg-muted-foreground/10"
+          >
+            Verify
           </Button>
         </div>
         <div className="flex justify-between items-center bg-muted-foreground/10 p-4 rounded-lg">
@@ -34,7 +37,10 @@ const Security = () => {
               Ensure your account uses a strong, unique password.
             </p>
           </div>
-          <Button className="bg-muted-foregroud/10 border border-foreground text-foreground hover:bg-muted-foreground/10">
+          <Button
+            disabled
+            className="bg-muted-foregroud/10 border border-foreground text-foreground hover:bg-muted-foreground/10"
+          >
             Update
           </Button>
         </div>
