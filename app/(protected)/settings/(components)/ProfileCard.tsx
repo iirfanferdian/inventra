@@ -9,10 +9,19 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
-import { Camera, CircleUser, Loader, Save, User } from "lucide-react";
+import {
+  Camera,
+  CircleUser,
+  Loader,
+  Pen,
+  Pencil,
+  Save,
+  User,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import ProfilePicture from "./ProfilePicture";
 
 const ProfileCard = () => {
   const { data, status, update } = useSession();
@@ -28,6 +37,7 @@ const ProfileCard = () => {
 
   const onSubmit = async (data) => {
     const result = await updateProfileDetails(data);
+    console.log(data);
     if (result?.success) {
       await update({
         user: {
@@ -35,10 +45,10 @@ const ProfileCard = () => {
           name: result.data?.fullName,
         },
       });
+      toast.success("Profile Updated Successfully", {
+        position: "top-center",
+      });
     }
-    toast.success("Profile Updated Successfully", {
-      position: "top-center",
-    });
   };
 
   return (
@@ -52,8 +62,8 @@ const ProfileCard = () => {
           Update your personal details and public profile.
         </p>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-2 w-full gap-8">
+      <div className="grid grid-cols-2 w-full gap-8">
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className=" flex flex-col gap-4">
             {/* FullName */}
             <Field>
@@ -101,33 +111,26 @@ const ProfileCard = () => {
                     maxLength: { value: 250, message: "Max is 250 Characters" },
                   })}
                 />
-                <InputGroupAddon className="bg-primary/5" align="block-end">
+                <InputGroupAddon
+                  className="bg-primary/5 dark:bg-transparent"
+                  align="block-end"
+                >
                   <InputGroupText>{bioContent.length}/250</InputGroupText>
                 </InputGroupAddon>
               </InputGroup>
             </Field>
+            <Button
+              type="submit"
+              className="mt-4 bg-primary dark:text-foreground w-30 relative shadow-md"
+            >
+              <Save className="absolute left-6" />
+              Save
+            </Button>
           </FieldGroup>
-
-          <div className="flex justify-center items-center border-l">
-            <div className="relative  w-30 h-30 bg-primary rounded-full">
-              <div className="flex items-center justify-center w-full h-full ">
-                <CircleUser
-                  size={70}
-                  className="text-primary-foreground dark:text-foreground"
-                />
-              </div>
-              <Camera
-                size={30}
-                className="absolute p-2 right-0 bottom-1.5 bg-muted-foreground/60 rounded-full"
-              />
-            </div>
-          </div>
-        </div>
-        <Button className="mt-4 bg-primary dark:text-foreground w-30 relative shadow-md">
-          <Save className="absolute left-6" />
-          Save
-        </Button>
-      </form>
+        </form>
+        {/* Avatar Update */}
+        <ProfilePicture />
+      </div>
     </section>
   );
 };
