@@ -25,7 +25,7 @@ const Notifications = () => {
                 Get notified when items drop below safety threshold.
               </p>
             </div>
-            <Switch defaultChecked={true} />
+            <Switch checked={false} disabled />
           </div>
           <div className="flex justify-between">
             <div>
@@ -34,7 +34,7 @@ const Notifications = () => {
                 Receive a summary of your weekly activity.
               </p>
             </div>
-            <Switch />
+            <Switch disabled />
           </div>
           <div className="flex justify-between">
             <div>
@@ -43,7 +43,7 @@ const Notifications = () => {
                 Stay informed about new features and improvements.
               </p>
             </div>
-            <Switch />
+            <Switch disabled />
           </div>
         </div>
       </div>
