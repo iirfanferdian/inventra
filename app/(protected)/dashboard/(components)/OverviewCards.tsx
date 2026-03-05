@@ -5,7 +5,6 @@ import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
 import { percentageDiff } from "@/utils/percentageDiff";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { text } from "stream/consumers";
 
 const OverviewCards = () => {
   const { data: itemData, isPending: itemIsPending } = useQuery(
