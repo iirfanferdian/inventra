@@ -1,10 +1,11 @@
 "use client";
 import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
+import { useExportStore } from "@/hooks/use-export-store";
 import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
 import { percentageDiff } from "@/utils/percentageDiff";
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, Package, TrendingDown } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 const ReportCards = () => {
   const { data, isLoading } = useQuery(TransactionQueryOptions.all());
@@ -95,6 +96,16 @@ const ReportCards = () => {
       // inventoryValue: formattedPrice(inventoryValue),
     };
   }, [data, currency, currentMonth, currentYear, lastMonth, lastMonthYear]);
+
+  const setExportData = useExportStore((state) => state.setExportData);
+  const clearExport = useExportStore((state) => state.clearExport);
+
+  useEffect(() => {
+    // Kita set data kosong [] tapi typenya "reports" supaya tombol PDF muncul & aktif
+    setExportData([], "reports");
+
+    return () => clearExport();
+  }, []);
 
   return (
     <section className="w-full grid grid-cols-3 gap-4">

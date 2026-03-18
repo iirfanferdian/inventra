@@ -11,10 +11,11 @@ import { TransactionQueryOptions } from "@/hooks/queries/use-transactions";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, LoaderCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
+import { useExportStore } from "@/hooks/use-export-store";
 
 const TYPE_CONFIG = {
   IN: {
@@ -37,6 +38,9 @@ export function TransactionsTable() {
     TransactionQueryOptions.all(type === "all" ? undefined : type),
   );
 
+  const setExportData = useExportStore((state) => state.setExportData);
+  const clearExport = useExportStore((state) => state.clearExport);
+
   const currency = useCurrencyStore((state) => state.currency);
   const validateData = useMemo(() => {
     if (!data?.data) return [];
@@ -55,6 +59,18 @@ export function TransactionsTable() {
       };
     });
   }, [data, currency]);
+
+  useEffect(() => {
+    // 1. Simpan ke store saat data berubah (atau saat mount)
+    if (validateData.length > 0) {
+      setExportData(validateData, "transactions");
+    }
+
+    // 2. Cleanup Function: Terpanggil saat ganti page / unmount
+    return () => {
+      clearExport();
+    };
+  }, [validateData, setExportData, clearExport]);
 
   if (isLoading) {
     return (

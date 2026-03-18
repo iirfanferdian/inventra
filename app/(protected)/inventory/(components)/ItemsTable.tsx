@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react"; // Tambah useEffect
 import { useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircle, Package, Trash2 } from "lucide-react";
 
 import { deleteItem } from "@/app/actions/items";
 import { ItemQueryOptions } from "@/hooks/queries/use-items";
+import { useExportStore } from "@/hooks/use-export-store"; // Import store kamu
 import {
   Table,
   TableBody,
@@ -22,7 +23,6 @@ import { Badge } from "@/components/ui/badge";
 import AlertWindow from "./AlertWindow";
 import { formattedPrice, useCurrencyStore } from "@/utils/formatPrice";
 
-// 1. Konfigurasi Status (Single Source of Truth)
 const STATUS_CONFIG = {
   onStock: {
     label: "On Stock",
@@ -42,21 +42,21 @@ export function ItemsTable() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
 
-  // Get URL PARAMS
+  // Ambil fungsi set dan clear dari store
+  const setExportData = useExportStore((state) => state.setExportData);
+  const clearExport = useExportStore((state) => state.clearExport);
+
   const category = searchParams.get("category") || undefined;
   const statusFilter = searchParams.get("status") || "all";
   const searchValue = searchParams.get("q") || undefined;
 
-  // Fetch Data
   const { data, isPending: queryPending } = useQuery(
     ItemQueryOptions.all({ category }),
   );
 
-  // Delete Mutation
   const { mutate, isPending, variables } = useMutation({
     mutationFn: (itemId: string) => deleteItem(itemId),
     onSuccess: async () => {
-      // Invalidate
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["items"] }),
         queryClient.invalidateQueries({ queryKey: ["category"] }),
@@ -67,29 +67,22 @@ export function ItemsTable() {
 
   const currency = useCurrencyStore((state) => state.currency);
 
-  // Data for render usage (Processing Data for min stock and currency) IMPORTANT BEFORE RENDER for efficiency
   const processedItems = useMemo(() => {
     if (!data) return [];
 
-    // Get the formated data
     const mapped = data.map((item) => {
-      // get the data min stock
       const effectiveMinStock = item.minStock || 5;
-      // Set status key to STATUS_CONFIG with default "onStock"
       let statusKey: keyof typeof STATUS_CONFIG = "onStock";
 
-      // Check current stock to set the statusKey
       if (item.currentStock <= 0) {
         statusKey = "outStock";
       } else if (item.currentStock < effectiveMinStock) {
         statusKey = "lowStock";
       }
 
-      // Calculated progress bar (max 100%)
       const maxCap = Math.max(effectiveMinStock * 2, 20);
       const progressValue = Math.min((item.currentStock / maxCap) * 100, 100);
 
-      // Return the data to mapped variable
       return {
         ...item,
         statusKey,
@@ -98,14 +91,12 @@ export function ItemsTable() {
         formattedPrice: formattedPrice(item.price, currency),
       };
     });
-    //Set filtered to clean data without filter
+
     let filtered = mapped;
-    // Then check Filter By statusFilter from URL if it's not all add the status filter to filtered var
     if (statusFilter !== "all") {
       filtered = mapped.filter((item) => item.statusKey === statusFilter);
     }
 
-    // Check if params of searchValue {"q?"} exists, then add the filter it and overwrite to filtered value
     if (searchValue) {
       const lowerQuery = searchValue.toLowerCase();
       filtered = filtered.filter(
@@ -115,11 +106,22 @@ export function ItemsTable() {
       );
     }
 
-    //Return the result filtered
     return filtered;
   }, [data, statusFilter, searchValue, currency]);
 
-  // Loader if query of getting items is pending
+  // --- LOGIKA EXPORT SYNC ---
+  useEffect(() => {
+    // 1. Simpan ke store saat data berubah (atau saat mount)
+    if (processedItems.length > 0) {
+      setExportData(processedItems, "inventory");
+    }
+
+    // 2. Cleanup Function: Terpanggil saat ganti page / unmount
+    return () => {
+      clearExport();
+    };
+  }, [processedItems, setExportData, clearExport]);
+
   if (queryPending) {
     return (
       <div className="w-full h-64 flex flex-col items-center justify-center">
@@ -131,11 +133,9 @@ export function ItemsTable() {
     );
   }
 
-  //Return all the data from processedItems
   return (
     <div className="rounded-md border bg-card">
       <Table>
-        {/* Table Header */}
         <TableHeader>
           <TableRow>
             <TableHead className="w-[300px]">Item</TableHead>
@@ -147,7 +147,6 @@ export function ItemsTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {/* Set logic for Table Items to render item in Client */}
           {processedItems.length === 0 ? (
             <TableRow>
               <TableCell
@@ -162,13 +161,11 @@ export function ItemsTable() {
           ) : (
             processedItems?.map((item) => {
               const isDeleting = isPending && variables === item.id;
-
               return (
                 <TableRow
                   key={item?.id}
                   className={isDeleting ? "opacity-40 select-none" : ""}
                 >
-                  {/* Info Product */}
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-muted rounded-lg">
@@ -184,11 +181,9 @@ export function ItemsTable() {
                       </div>
                     </div>
                   </TableCell>
-
                   <TableCell className="font-mono text-xs uppercase tracking-wider">
                     {item?.sku}
                   </TableCell>
-
                   <TableCell>
                     {item?.category?.name ? (
                       <Badge variant="outline" className="font-medium">
@@ -200,8 +195,6 @@ export function ItemsTable() {
                       </span>
                     )}
                   </TableCell>
-
-                  {/* Stock Level & Progress */}
                   <TableCell>
                     <div className="flex justify-between items-center mb-1.5">
                       <span className="text-xs font-semibold">
@@ -218,12 +211,9 @@ export function ItemsTable() {
                     </div>
                     <Progress value={item?.progressValue} className="h-1.5" />
                   </TableCell>
-
                   <TableCell className="text-right font-semibold">
                     {item?.formattedPrice}
                   </TableCell>
-
-                  {/* Actions */}
                   <TableCell className="text-right">
                     <div className="flex justify-end items-center gap-1">
                       {isDeleting ? (
