@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { SidebarCollapseButton } from "@/components/ui/SidebarCollapseButton";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import ReportCards from "./(components)/ReportCards";
 import ReportCharts from "./(components)/ReportCharts";
 import { ProfitTrend } from "./(components)/ProfitTrend";
+import ExportButton from "@/components/ExportButton";
 
 const page = async () => {
   return (
@@ -16,19 +17,15 @@ const page = async () => {
               Analyze your business performance and trends
             </p>
           </div>
-          <Button className="bg-primary hover:bg-primary/80 dark:text-foreground ">
-            <Plus /> Export Report{" "}
-          </Button>
+          <ExportButton />
         </header>
-        {/* Cards Section */}
-        <ReportCards />
-
-        {/* 2 Charts Section */}
-        <ReportCharts />
-
-        {/* Profit Trend */}
-        <ProfitTrend />
-        <div className="bottom-10 absolute md:hidden lg:hidden">
+        <div></div>
+        <div id="report-area" className="space-y-6 transition-all">
+          <ReportCards />
+          <ReportCharts />
+          <ProfitTrend />
+        </div>
+        <div className="bottom-10 sticky md:hidden lg:hidden">
           <SidebarCollapseButton mode="mobile" />
         </div>
       </div>

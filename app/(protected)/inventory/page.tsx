@@ -1,11 +1,10 @@
-import { Button } from "@/components/ui/button";
 import { SidebarCollapseButton } from "@/components/ui/SidebarCollapseButton";
-import { Download, Search } from "lucide-react";
 import { FilterDropdown } from "./(components)/FilterDropdown";
 import { CategoriesDropdown } from "./(components)/CategoriesDropdown";
 import { ItemsTable } from "./(components)/ItemsTable";
 import { NewItemButton } from "./(components)/AddNewItemButton";
 import SearchItemInput from "./(components)/SearchItemInput";
+import ExportButton from "@/components/ExportButton";
 
 const page = async () => {
   return (
@@ -29,13 +28,11 @@ const page = async () => {
             <CategoriesDropdown />
           </div>
           <div className="flex items-center justify-end w-1/2">
-            <Button className="bg-primary dark:text-foreground text-primary-foreground">
-              <Download /> Export
-            </Button>
+            <ExportButton />
           </div>
         </section>
         <ItemsTable />
-        <div className="bottom-10 absolute md:hidden lg:hidden">
+        <div className="bottom-10 sticky md:hidden lg:hidden">
           <SidebarCollapseButton className="fixed" mode="mobile" />
         </div>
       </div>

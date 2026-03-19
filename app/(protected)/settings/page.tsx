@@ -15,7 +15,7 @@ const page = async () => {
       <SelectionButtons />
 
       <Section />
-      <div className="bottom-10 absolute md:hidden lg:hidden">
+      <div className="bottom-10 sticky md:hidden lg:hidden">
         <SidebarCollapseButton mode="mobile" />
       </div>
     </div>

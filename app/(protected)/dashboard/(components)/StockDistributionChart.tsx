@@ -23,12 +23,29 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { ItemQueryOptions } from "@/hooks/queries/use-items";
 
+// Predefined color palette - always consistent
+const CHART_COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
+
+const CHART_COLOR_KEYS = [
+  "chart-1",
+  "chart-2",
+  "chart-3",
+  "chart-4",
+  "chart-5",
+];
+
 export function StockDistributionChart() {
   const { data: items, isPending } = useQuery(ItemQueryOptions.all());
 
   // Processed data
   const processedData = React.useMemo(() => {
-    if (!items) return { chartData: [], totalStock: 0 };
+    if (!items) return { chartData: [], totalStock: 0, colorMap: {} };
 
     // Grouping stock based on category
     const categoryMap = items.reduce(
@@ -51,14 +68,23 @@ export function StockDistributionChart() {
       0,
     );
 
+    const colorMap: Record<string, string> = {};
+
     //Conditional statement if there's 5 or less categories
     if (sortedArray.length <= 5) {
-      return {
-        chartData: sortedArray.map((item) => ({
+      const chartData = sortedArray.map((item, index) => {
+        const colorKey = CHART_COLOR_KEYS[index];
+        colorMap[item.category] = CHART_COLORS[index];
+        return {
           ...item,
-          fill: `var(--color-${item.category.replace(/\s+/g, "-")})`,
-        })),
+          fill: CHART_COLORS[index],
+        };
+      });
+
+      return {
+        chartData,
         totalStock: totalStockAll,
+        colorMap,
       };
     }
 
@@ -67,47 +93,75 @@ export function StockDistributionChart() {
     const othersRaw = sortedArray.slice(4);
     const othersTotal = othersRaw.reduce((acc, curr) => acc + curr.stock, 0);
 
-    const finalData = [
-      ...top4.map((item) => ({
-        ...item,
-        fill: `var(--color-${item.category.replace(/\s+/g, "-")})`,
-      })),
+    const chartData = [
+      ...top4.map((item, index) => {
+        colorMap[item.category] = CHART_COLORS[index];
+        return {
+          ...item,
+          fill: CHART_COLORS[index],
+        };
+      }),
       {
         category: "Others",
         stock: othersTotal,
-        fill: "var(--color-others)",
+        fill: "hsl(var(--muted-foreground))",
       },
     ];
 
-    return { chartData: finalData, totalStock: totalStockAll };
+    colorMap["Others"] = "hsl(var(--muted-foreground))";
+
+    return { chartData, totalStock: totalStockAll, colorMap };
   }, [items]);
 
-  const { chartData, totalStock } = processedData;
+  const { chartData, totalStock, colorMap } = processedData;
 
-  // Dynamic ChartConfig
+  // Dynamic ChartConfig - simplified
   const dynamicConfig = React.useMemo(() => {
     const config: ChartConfig = {
       stock: { label: "Items" },
     };
 
-    chartData.forEach((item, index) => {
-      const key = item.category.replace(/\s+/g, "-");
-
-      if (item.category === "Others") {
-        config["others"] = {
-          label: "Others",
-          color: "hsl(var(--muted-foreground))",
-        };
-      } else {
-        config[key] = {
-          label: item.category,
-          color: `hsl(var(--chart-${(index % 4) + 1}))`,
-        };
-      }
+    chartData.forEach((item) => {
+      config[item.category] = {
+        label: item.category,
+        color: colorMap[item.category] || "hsl(var(--foreground))",
+      };
     });
 
     return config;
-  }, [chartData]);
+  }, [chartData, colorMap]);
+
+  if (isPending) {
+    return (
+      <Card className="flex flex-col">
+        <CardHeader className="items-center pb-0">
+          <CardTitle>Inventory Distribution</CardTitle>
+          <CardDescription>By Product Category</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 pb-0">
+          <div className="h-62.5 flex items-center justify-center text-muted-foreground">
+            Loading...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!chartData || chartData.length === 0) {
+    return (
+      <Card className="flex flex-col">
+        <CardHeader className="items-center pb-0">
+          <CardTitle>Inventory Distribution</CardTitle>
+          <CardDescription>By Product Category</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 pb-0">
+          <div className="h-62.5 flex items-center justify-center text-muted-foreground">
+            No data available
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="flex flex-col">
@@ -118,7 +172,7 @@ export function StockDistributionChart() {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={dynamicConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square max-h-62.5"
         >
           <PieChart>
             <ChartTooltip
@@ -166,7 +220,7 @@ export function StockDistributionChart() {
             </Pie>
             <ChartLegend
               content={<ChartLegendContent nameKey="category" />}
-              className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+              className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
             />
           </PieChart>
         </ChartContainer>

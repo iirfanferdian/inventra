@@ -12,5 +12,5 @@ export const percentageDiff = (
 
   return Number(percentageChange) >= 0
     ? "+" + percentageChange
-    : "-" + percentageChange;
+    : "" + percentageChange;
 };

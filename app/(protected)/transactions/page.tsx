@@ -5,6 +5,7 @@ import TransactionCards from "./(components)/TransactionCards";
 import { TransactionsFilter } from "./(components)/TransactionsFilter";
 import { TransactionsTable } from "./(components)/TransactionsTable";
 import { AddNewTransactionButton } from "./(components)/AddNewTransactionButton";
+import ExportButton from "@/components/ExportButton";
 
 const page = async () => {
   return (
@@ -25,16 +26,14 @@ const page = async () => {
         {/* Filter and Export Section */}
         <section className="flex justify-between mb-6">
           <TransactionsFilter />
-          <Button className="bg-transparent dark:text-foreground text-foreground border border-input shadow-sm hover:bg-input text-sm">
-            <Download /> Export
-          </Button>
+          <ExportButton />
         </section>
 
         {/* Table Section */}
 
         <TransactionsTable />
 
-        <div className="bottom-10 absolute md:hidden lg:hidden">
+        <div className="bottom-10 sticky md:hidden lg:hidden">
           <SidebarCollapseButton mode="mobile" />
         </div>
       </div>
