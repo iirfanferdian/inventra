@@ -181,6 +181,16 @@ async function createTransactionsInBatches(
   batchSize: number = 50,
 ): Promise<number> {
   let totalCreated = 0;
+  // Track current stock for each item to prevent negative stock
+  const currentStocks: Record<string, number> = {};
+
+  // Initialize current stocks from initial stock amounts
+  for (const item of createdItems) {
+    const initialItem = DUMMY_ITEMS.find((di) => di.price === item.price);
+    if (initialItem) {
+      currentStocks[item.id] = initialItem.initialStock;
+    }
+  }
 
   for (let i = 0; i < transactions.length; i += batchSize) {
     const batch = transactions.slice(i, i + batchSize);
@@ -193,6 +203,18 @@ async function createTransactionsInBatches(
           const item = createdItems[transaction.itemIndex];
 
           try {
+            // For OUT transactions, check if we have enough stock
+            if (
+              transaction.type === "OUT" &&
+              currentStocks[item.id] < transaction.quantity
+            ) {
+              // Skip this transaction if not enough stock
+              console.warn(
+                `Skipping OUT transaction for item ${item.id}: insufficient stock (have ${currentStocks[item.id]}, need ${transaction.quantity})`,
+              );
+              continue;
+            }
+
             // Create transaction record
             await tx.transaction.create({
               data: {
@@ -216,6 +238,8 @@ async function createTransactionsInBatches(
               finalStocks[item.id] = 0;
             }
             finalStocks[item.id] += operation;
+            // Update current stock tracker
+            currentStocks[item.id] += operation;
 
             totalCreated++;
           } catch (error) {
