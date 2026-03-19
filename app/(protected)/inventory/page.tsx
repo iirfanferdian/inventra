@@ -32,7 +32,7 @@ const page = async () => {
           </div>
         </section>
         <ItemsTable />
-        <div className="bottom-10 absolute md:hidden lg:hidden">
+        <div className="bottom-10 sticky md:hidden lg:hidden">
           <SidebarCollapseButton className="fixed" mode="mobile" />
         </div>
       </div>
