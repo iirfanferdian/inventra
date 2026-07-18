@@ -87,11 +87,14 @@ const DUMMY_ITEMS: DummyItem[] = [
   },
 ];
 
-// Generate realistic transactions spread across 3 months
+// Generate realistic transactions spread across the last 3 months from today
 function generateDummyTransactions(): DummyTransaction[] {
   const transactions: DummyTransaction[] = [];
-  const today = new Date(2026, 2, 19); // March 19, 2026
-  const threeMonthsAgo = new Date(2025, 11, 19); // December 19, 2025
+  const monthsBack = 3;
+  const today = new Date();
+  const threeMonthsAgo = new Date(today);
+
+  threeMonthsAgo.setMonth(today.getMonth() - monthsBack);
 
   // Generate transactions for each day in the range
   for (
@@ -137,9 +140,22 @@ async function createItemsInBatch(
   userId: string,
   items: DummyItem[],
 ): Promise<{ id: string; price: unknown }[]> {
-  const createdItems = [];
+  const createdItems: { id: string; price: unknown }[] = [];
 
   for (const itemData of items) {
+    const existingItem = await prisma.item.findFirst({
+      where: {
+        userId,
+        sku: itemData.sku,
+      },
+      select: { id: true, price: true },
+    });
+
+    if (existingItem) {
+      createdItems.push({ id: existingItem.id, price: existingItem.price });
+      continue;
+    }
+
     const item = await prisma.item.create({
       data: {
         name: itemData.name,
