@@ -77,7 +77,7 @@ const TransactionCards = () => {
 
       {/* 3 */}
       <div className="flex flex-col justify-center border border-muted-background h-auto my-8 p-6 bg-background rounded-lg hover:shadow-lg transition-shadow">
-        <p className="text-muted-foreground">Net Movement</p>
+        <p className="text-muted-foreground">Net Inflow - Outflow</p>
         <h1 className="text-2xl font-bold">
           {" "}
           {isPending ? (

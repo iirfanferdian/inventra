@@ -48,7 +48,7 @@ export default async function AuthLayout({
           </li>
 
           {/* Team Collaboration*/}
-          <li className="list-none flex justify-center items-center gap-3">
+          {/* <li className="list-none flex justify-center items-center gap-3">
             <div className="bg-muted-foreground/40 p-2 rounded-xl">
               <Users size={30} className="dark:text-foreground" />
             </div>
@@ -58,7 +58,7 @@ export default async function AuthLayout({
                 Work together with role-based access controls
               </p>
             </div>
-          </li>
+          </li> */}
 
           {/* Secure & Reliable */}
           <li className="list-none flex justify-center items-center gap-3">
